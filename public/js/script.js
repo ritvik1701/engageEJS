@@ -119,6 +119,6 @@ const toggleAudio = (mediaStream) => {
     !mediaStream.getAudioTracks()[0].enabled;
 };
 
-const testVideo = document.createElement("video");
-testVideo.setAttribute("poster", "assets/userIcon.jpg");
-videos.append(testVideo);
+// const testVideo = document.createElement("video");
+// testVideo.setAttribute("poster", "assets/userIcon.jpg");
+// videos.append(testVideo);
