@@ -1,5 +1,5 @@
 const peer = new Peer();
-const socket = io("http://localhost:5000");
+const socket = io.connect("/");
 const videoGrid = document.querySelector("#video-grid");
 
 const selfVideo = document.createElement("video");
