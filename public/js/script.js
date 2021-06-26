@@ -87,6 +87,7 @@ socket.on("newChat", (data) => {
 
 const addStreamToVideoObject = (videoElement, mediaStream) => {
   videoElement.srcObject = mediaStream;
+  console.log("Set source object for video");
   videoElement.addEventListener("loadedmetadata", () => {
     console.log("video loadad, adding to grid");
     videoElement.play();
