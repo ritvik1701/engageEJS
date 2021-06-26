@@ -4,13 +4,13 @@ const app = express();
 const { v4 } = require("uuid");
 const cors = require("cors");
 const server = require("http").createServer(app);
+
 const io = require("socket.io")(server, {
   cors: {
     origin: "*",
   },
 });
 
-app.use(cors());
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
 
