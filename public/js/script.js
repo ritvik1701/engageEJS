@@ -1,17 +1,40 @@
 const peer = new Peer();
 const socket = io.connect("/");
-const videoGrid = document.querySelector("#video-grid");
+const videos = document.querySelector("#video-grid");
+const controls = document.querySelector(".controls");
 
 const selfVideo = document.createElement("video");
 selfVideo.muted = true;
 
 let roomUsers = {};
 
+// let userStream = null;
+
 const videoConstraints = { audio: true, video: true };
 navigator.mediaDevices
   .getUserMedia(videoConstraints)
   .then((mediaStream) => {
     addStreamToVideoObject(selfVideo, mediaStream);
+    // userStream = mediaStream;
+
+    const audioButton = document.createElement("button");
+    audioButton.addEventListener("click", (e) => {
+      toggleAudio(mediaStream);
+    });
+    const muteIcon = document.createElement("i");
+    muteIcon.classList.add("fas", "fa-microphone-slash", "fa-lg");
+    audioButton.append(muteIcon);
+
+    const videoButton = document.createElement("button");
+    videoButton.addEventListener("click", (e) => {
+      toggleVideo(mediaStream, selfVideo);
+    });
+    const videoIcon = document.createElement("i");
+    videoIcon.classList.add("fas", "fa-video-slash", "fa-lg");
+    videoButton.append(videoIcon);
+
+    controls.append(audioButton);
+    controls.append(videoButton);
 
     peer.on("call", (call) => {
       console.log("Getting call from PeerID: ", call.peer);
@@ -66,13 +89,13 @@ const addStreamToVideoObject = (videoElement, mediaStream) => {
     console.log("video loadad, adding to grid");
     videoElement.play();
   });
-  videoGrid.append(videoElement);
+  videos.append(videoElement);
 };
 
 const callUserWithPeerID = (toCallPeerID, currentUserStream) => {
   const call = peer.call(toCallPeerID, currentUserStream);
   const peerVideo = document.createElement("video");
-
+  // peerVideo.setAttribute("poster", "assets/userIcon.png");
   call.on("stream", (peerStream) => {
     addStreamToVideoObject(peerVideo, peerStream);
   });
@@ -84,3 +107,18 @@ const callUserWithPeerID = (toCallPeerID, currentUserStream) => {
 
   roomUsers[toCallPeerID] = call;
 };
+
+const toggleVideo = (mediaStream, video) => {
+  mediaStream.getVideoTracks()[0].enabled =
+    !mediaStream.getVideoTracks()[0].enabled;
+  video.setAttribute("poster", "assets/userIcon.png");
+};
+
+const toggleAudio = (mediaStream) => {
+  mediaStream.getAudioTracks()[0].enabled =
+    !mediaStream.getAudioTracks()[0].enabled;
+};
+
+const testVideo = document.createElement("video");
+testVideo.setAttribute("poster", "assets/userIcon.jpg");
+videos.append(testVideo);

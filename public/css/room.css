@@ -5,3 +5,10 @@ video {
   border-radius: 10px;
   margin: 20px;
 }
+
+.controls button {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 0px;
+}
