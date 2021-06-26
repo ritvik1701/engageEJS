@@ -40,12 +40,14 @@ navigator.mediaDevices
       console.log("Getting call from PeerID: ", call.peer);
       roomUsers[call.peer] = call;
       call.answer(mediaStream);
+      console.log("Answering the call");
       const peerVideo = document.createElement("video");
       call.on("stream", (peerStream) => {
+        console.log("Got peer video stream");
         addStreamToVideoObject(peerVideo, peerStream);
       });
       call.on("close", () => {
-        console.log("closing call media stream");
+        console.log("closing call");
         peerVideo.remove();
       });
     });
@@ -95,8 +97,9 @@ const addStreamToVideoObject = (videoElement, mediaStream) => {
 const callUserWithPeerID = (toCallPeerID, currentUserStream) => {
   const call = peer.call(toCallPeerID, currentUserStream);
   const peerVideo = document.createElement("video");
-  // peerVideo.setAttribute("poster", "assets/userIcon.png");
+  console.log("calling user with peerID: " + toCallPeerID);
   call.on("stream", (peerStream) => {
+    console.log("Got peer video stream");
     addStreamToVideoObject(peerVideo, peerStream);
   });
   call.on("close", () => {
