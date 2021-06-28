@@ -97,7 +97,7 @@ socket.on("newChat", (data) => {
 });
 
 const addStreamToVideoObject = (videoElement, mediaStream) => {
-  videoElement.setAttribute("poster", "assets/userIcon.png");
+  // videoElement.setAttribute("poster", "assets/userIcon.png");
   videoElement.srcObject = mediaStream;
   console.log("Set source object for video");
   videoElement.addEventListener("loadedmetadata", () => {
