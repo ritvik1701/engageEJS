@@ -11,6 +11,9 @@ const muteButton = document.querySelector("#muteButton");
 const videoButton = document.querySelector("#videoButton");
 const disconnectButton = document.querySelector("#disconnectButton");
 const copyRoomInfo = document.querySelector("#copyRoom");
+const sendButton = document.querySelector("#sendButton");
+const chatInput = document.querySelector("#chatInput");
+const chatContent = document.querySelector("#chatContent");
 
 const selfVideo = document.createElement("video");
 selfVideo.setAttribute("poster", "assets/userIcon.png");
@@ -72,21 +75,38 @@ socket.on("leavingCall", (userPeerID) => {
 });
 
 socket.on("newChat", (data) => {
-  console.log(data);
+  const content = data.message;
+  const user = data.username;
+  const message = document.createElement("div");
+  const para = document.createElement("p");
+  para.innerHTML = content;
+  const header = document.createElement("h5");
+  header.innerHTML = user;
+
+  message.classList.add("message");
+  message.appendChild(header);
+  message.appendChild(para);
+
+  chatContent.appendChild(message);
+  chatContent.scrollTop = chatContent.scrollHeight;
 });
 
 const initializeControls = (mediaStream, selfVideo) => {
   // roomLink.innerHTML = ROOMID;
   tippy("#copyRoom", {
-    content: "Click to copy room link",
+    theme: "light",
+    content: "Copy invite link",
   });
   tippy("#muteButton", {
+    theme: "light",
     content: "Toggle mute",
   });
   tippy("#videoButton", {
+    theme: "light",
     content: "Toggle video",
   });
   tippy("#disconnectButton", {
+    theme: "light",
     content: "Disconnect",
   });
   copyRoomInfo.addEventListener("click", (e) => {
@@ -104,6 +124,14 @@ const initializeControls = (mediaStream, selfVideo) => {
   });
   disconnectButton.addEventListener("click", (e) => {
     disconnectCall();
+  });
+  sendButton.addEventListener("click", (e) => {
+    const message = chatInput.value;
+    if (message !== "") {
+      const username = USERNAME;
+      socket.emit("data", { username, message });
+      chatInput.value = "";
+    }
   });
 };
 

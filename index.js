@@ -18,8 +18,9 @@ app.use(express.static(path.join(__dirname, "public")));
 // when at root, give a new random roomID
 app.get("/", (req, res) => {
   const roomid = v4();
-  console.log(`at root of website, redirecting to room ${roomid}`);
-  res.redirect(`/${roomid}`);
+  // console.log(`at root of website, redirecting to room ${roomid}`);
+  // res.redirect(`/${roomid}`);
+  res.render("home", { roomId: roomid });
 });
 
 app.get("/:roomID", (req, res) => {
