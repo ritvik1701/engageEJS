@@ -52,7 +52,7 @@ navigator.mediaDevices
       call.answer(mediaStream);
       console.log("Answering the call");
       const peerVideo = document.createElement("video");
-      peerVideo.setAttribute("poster", "assets/userIcon.png");
+      // peerVideo.setAttribute("poster", "assets/userIcon.png");
       call.on("stream", (peerStream) => {
         console.log("Got peer video stream");
         addStreamToVideoObject(peerVideo, peerStream);
@@ -97,6 +97,7 @@ socket.on("newChat", (data) => {
 });
 
 const addStreamToVideoObject = (videoElement, mediaStream) => {
+  videoElement.setAttribute("poster", "assets/userIcon.png");
   videoElement.srcObject = mediaStream;
   console.log("Set source object for video");
   videoElement.addEventListener("loadedmetadata", () => {
@@ -109,7 +110,7 @@ const addStreamToVideoObject = (videoElement, mediaStream) => {
 const callUserWithPeerID = (toCallPeerID, currentUserStream) => {
   const call = peer.call(toCallPeerID, currentUserStream);
   const peerVideo = document.createElement("video");
-  peerVideo.setAttribute("poster", "assets/userIcon.png");
+  // peerVideo.setAttribute("poster", "assets/userIcon.png");
   console.log("calling user with peerID: " + toCallPeerID);
   call.on("stream", (peerStream) => {
     console.log("Got peer video stream");
@@ -127,7 +128,7 @@ const callUserWithPeerID = (toCallPeerID, currentUserStream) => {
 const toggleVideo = (mediaStream, video) => {
   mediaStream.getVideoTracks()[0].enabled =
     !mediaStream.getVideoTracks()[0].enabled;
-  video.setAttribute("poster", "assets/userIcon.png");
+  // video.setAttribute("poster", "assets/userIcon.png");
 };
 
 const toggleAudio = (mediaStream) => {
