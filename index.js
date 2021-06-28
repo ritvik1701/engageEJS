@@ -7,8 +7,8 @@ const cors = require("cors");
 const fs = require("fs");
 
 const { PeerServer } = require("peer");
-// var privateKey = fs.readFileSync("privatekey.pem");
-// var certificate = fs.readFileSync("certificate.pem");
+var privateKey = fs.readFileSync(__dirname + "/private.key", "utf8");
+var certificate = fs.readFileSync(__dirname + "/public.cert", "utf8");
 
 const server = require("http").createServer(
   {
