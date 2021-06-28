@@ -1,4 +1,9 @@
-const peer = new Peer({ host: "/", secure: true, port: 443, path: "/" });
+const peer = new Peer({
+  host: "peerjsritvik.herokuapp.com",
+  secure: true,
+  port: 443,
+  path: "/",
+});
 const socket = io.connect("/");
 const videos = document.querySelector("#video-grid");
 const controls = document.querySelector(".controls");

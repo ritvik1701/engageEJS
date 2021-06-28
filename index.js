@@ -6,15 +6,13 @@ const cors = require("cors");
 
 const fs = require("fs");
 
-const { PeerServer } = require("peer");
+// const { PeerServer } = require("peer");
 // var privateKey = fs.readFileSync(__dirname + "/private.key", "utf8");
 // var certificate = fs.readFileSync(__dirname + "/public.cert", "utf8");
 
 const server = require("http").createServer(app);
-const peerServer = PeerServer({
-  port: 443,
-  path: "/",
-});
+
+// const peerServer = PeerServer({ port: 443, secure: true, path: "/myapp" });
 
 const io = require("socket.io")(server, {
   cors: {
