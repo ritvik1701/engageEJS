@@ -4,6 +4,7 @@ const videos = document.querySelector("#video-grid");
 const controls = document.querySelector(".controls");
 
 const selfVideo = document.createElement("video");
+selfVideo.setAttribute("poster", "assets/userIcon.png");
 selfVideo.muted = true;
 
 let roomUsers = {};
@@ -33,8 +34,17 @@ navigator.mediaDevices
     videoIcon.classList.add("fas", "fa-video-slash", "fa-lg");
     videoButton.append(videoIcon);
 
+    const disconnectButton = document.createElement("button");
+    disconnectButton.addEventListener("click", (e) => {
+      disconnectCall();
+    });
+    const disconnectIcon = document.createElement("i");
+    disconnectIcon.classList.add("fas", "fa-phone-slash", "fa-lg");
+    disconnectButton.append(disconnectIcon);
+
     controls.append(audioButton);
     controls.append(videoButton);
+    controls.append(disconnectButton);
 
     peer.on("call", (call) => {
       console.log("Getting call from PeerID: ", call.peer);
@@ -42,6 +52,7 @@ navigator.mediaDevices
       call.answer(mediaStream);
       console.log("Answering the call");
       const peerVideo = document.createElement("video");
+      peerVideo.setAttribute("poster", "assets/userIcon.png");
       call.on("stream", (peerStream) => {
         console.log("Got peer video stream");
         addStreamToVideoObject(peerVideo, peerStream);
@@ -98,6 +109,7 @@ const addStreamToVideoObject = (videoElement, mediaStream) => {
 const callUserWithPeerID = (toCallPeerID, currentUserStream) => {
   const call = peer.call(toCallPeerID, currentUserStream);
   const peerVideo = document.createElement("video");
+  peerVideo.setAttribute("poster", "assets/userIcon.png");
   console.log("calling user with peerID: " + toCallPeerID);
   call.on("stream", (peerStream) => {
     console.log("Got peer video stream");
@@ -121,6 +133,12 @@ const toggleVideo = (mediaStream, video) => {
 const toggleAudio = (mediaStream) => {
   mediaStream.getAudioTracks()[0].enabled =
     !mediaStream.getAudioTracks()[0].enabled;
+};
+
+const disconnectCall = () => {
+  socket.emit("pressedDisconnectButton", peer.id);
+  console.log("emitted disconnectButton event");
+  window.location.replace("/");
 };
 
 // const testVideo = document.createElement("video");

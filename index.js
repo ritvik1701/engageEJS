@@ -38,6 +38,11 @@ io.on("connection", (socket) => {
       console.log("user left");
       socket.broadcast.to(roomId).emit("leavingCall", userPeerID);
     });
+
+    socket.on("pressedDisconnectButton", (peerid) => {
+      console.log("recieved disconnectButton");
+      socket.broadcast.to(roomId).emit("leavingCall", peerid);
+    });
   });
 });
 
