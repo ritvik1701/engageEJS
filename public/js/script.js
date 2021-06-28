@@ -1,4 +1,4 @@
-const peer = new Peer({
+const peer = new Peer(undefined, {
   host: "peerjsritvik.herokuapp.com",
   secure: true,
   port: 443,
