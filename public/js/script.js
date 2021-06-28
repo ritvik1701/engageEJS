@@ -7,6 +7,10 @@ const peer = new Peer(undefined, {
 const socket = io.connect("/");
 const videos = document.querySelector("#video-grid");
 const controls = document.querySelector(".controls");
+const muteButton = document.querySelector("#muteButton");
+const videoButton = document.querySelector("#videoButton");
+const disconnectButton = document.querySelector("#disconnectButton");
+const copyRoomInfo = document.querySelector("#copyRoom");
 
 const selfVideo = document.createElement("video");
 selfVideo.setAttribute("poster", "assets/userIcon.png");
@@ -14,42 +18,13 @@ selfVideo.muted = true;
 
 let roomUsers = {};
 
-// let userStream = null;
-
 const videoConstraints = { audio: true, video: true };
 navigator.mediaDevices
   .getUserMedia(videoConstraints)
   .then((mediaStream) => {
     addStreamToVideoObject(selfVideo, mediaStream);
-    // userStream = mediaStream;
 
-    const audioButton = document.createElement("button");
-    audioButton.addEventListener("click", (e) => {
-      toggleAudio(mediaStream);
-    });
-    const muteIcon = document.createElement("i");
-    muteIcon.classList.add("fas", "fa-microphone-slash", "fa-lg");
-    audioButton.append(muteIcon);
-
-    const videoButton = document.createElement("button");
-    videoButton.addEventListener("click", (e) => {
-      toggleVideo(mediaStream, selfVideo);
-    });
-    const videoIcon = document.createElement("i");
-    videoIcon.classList.add("fas", "fa-video-slash", "fa-lg");
-    videoButton.append(videoIcon);
-
-    const disconnectButton = document.createElement("button");
-    disconnectButton.addEventListener("click", (e) => {
-      disconnectCall();
-    });
-    const disconnectIcon = document.createElement("i");
-    disconnectIcon.classList.add("fas", "fa-phone-slash", "fa-lg");
-    disconnectButton.append(disconnectIcon);
-
-    controls.append(audioButton);
-    controls.append(videoButton);
-    controls.append(disconnectButton);
+    initializeControls(mediaStream, selfVideo);
 
     peer.on("call", (call) => {
       console.log("Getting call from PeerID: ", call.peer);
@@ -57,7 +32,6 @@ navigator.mediaDevices
       call.answer(mediaStream);
       console.log("Answering the call");
       const peerVideo = document.createElement("video");
-      // peerVideo.setAttribute("poster", "assets/userIcon.png");
       call.on("stream", (peerStream) => {
         console.log("Got peer video stream");
         addStreamToVideoObject(peerVideo, peerStream);
@@ -101,8 +75,40 @@ socket.on("newChat", (data) => {
   console.log(data);
 });
 
+const initializeControls = (mediaStream, selfVideo) => {
+  // roomLink.innerHTML = ROOMID;
+  tippy("#copyRoom", {
+    content: "Click to copy room link",
+  });
+  tippy("#muteButton", {
+    content: "Toggle mute",
+  });
+  tippy("#videoButton", {
+    content: "Toggle video",
+  });
+  tippy("#disconnectButton", {
+    content: "Disconnect",
+  });
+  copyRoomInfo.addEventListener("click", (e) => {
+    let roomInfo = document.querySelector("#roomLink");
+    roomInfo.value = `https://engagecloneritvik.herokuapp.com/${ROOMID}`;
+    roomInfo.select();
+    roomInfo.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+  });
+  muteButton.addEventListener("click", (e) => {
+    toggleAudio(mediaStream);
+  });
+  videoButton.addEventListener("click", (e) => {
+    toggleVideo(mediaStream, selfVideo);
+  });
+  disconnectButton.addEventListener("click", (e) => {
+    disconnectCall();
+  });
+};
+
 const addStreamToVideoObject = (videoElement, mediaStream) => {
-  // videoElement.setAttribute("poster", "assets/userIcon.png");
+  videoElement.setAttribute("poster", "assets/userIcon.png");
   videoElement.srcObject = mediaStream;
   console.log("Set source object for video");
   videoElement.addEventListener("loadedmetadata", () => {
@@ -115,7 +121,6 @@ const addStreamToVideoObject = (videoElement, mediaStream) => {
 const callUserWithPeerID = (toCallPeerID, currentUserStream) => {
   const call = peer.call(toCallPeerID, currentUserStream);
   const peerVideo = document.createElement("video");
-  // peerVideo.setAttribute("poster", "assets/userIcon.png");
   console.log("calling user with peerID: " + toCallPeerID);
   call.on("stream", (peerStream) => {
     console.log("Got peer video stream");
@@ -133,12 +138,25 @@ const callUserWithPeerID = (toCallPeerID, currentUserStream) => {
 const toggleVideo = (mediaStream, video) => {
   mediaStream.getVideoTracks()[0].enabled =
     !mediaStream.getVideoTracks()[0].enabled;
-  // video.setAttribute("poster", "assets/userIcon.png");
+  if (videoButton.classList.contains("selected")) {
+    videoButton.classList.remove("selected");
+    videoButton.classList.add("deselected");
+  } else {
+    videoButton.classList.remove("deselected");
+    videoButton.classList.add("selected");
+  }
 };
 
 const toggleAudio = (mediaStream) => {
   mediaStream.getAudioTracks()[0].enabled =
     !mediaStream.getAudioTracks()[0].enabled;
+  if (muteButton.classList.contains("selected")) {
+    muteButton.classList.remove("selected");
+    muteButton.classList.add("deselected");
+  } else {
+    muteButton.classList.remove("deselected");
+    muteButton.classList.add("selected");
+  }
 };
 
 const disconnectCall = () => {
@@ -146,7 +164,3 @@ const disconnectCall = () => {
   console.log("emitted disconnectButton event");
   window.location.replace("/");
 };
-
-// const testVideo = document.createElement("video");
-// testVideo.setAttribute("poster", "assets/userIcon.jpg");
-// videos.append(testVideo);
