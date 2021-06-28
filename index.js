@@ -3,7 +3,28 @@ const express = require("express");
 const app = express();
 const { v4 } = require("uuid");
 const cors = require("cors");
-const server = require("http").createServer(app);
+
+const fs = require("fs");
+
+const { PeerServer } = require("peer");
+// var privateKey = fs.readFileSync("privatekey.pem");
+// var certificate = fs.readFileSync("certificate.pem");
+
+const server = require("http").createServer(
+  {
+    key: fs.readFileSync(__dirname + "/private.key", "utf8"),
+    cert: fs.readFileSync(__dirname + "/public.cert", "utf8"),
+  },
+  app
+);
+const peerServer = PeerServer({
+  port: 443,
+  path: "/",
+  ssl: {
+    key: privateKey,
+    cert: certificate,
+  },
+});
 
 const io = require("socket.io")(server, {
   cors: {

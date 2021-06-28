@@ -1,4 +1,4 @@
-const peer = new Peer();
+const peer = new Peer({ host: "/", secure: true, port: 443, path: "/" });
 const socket = io.connect("/");
 const videos = document.querySelector("#video-grid");
 const controls = document.querySelector(".controls");
@@ -101,7 +101,7 @@ const addStreamToVideoObject = (videoElement, mediaStream) => {
   videoElement.srcObject = mediaStream;
   console.log("Set source object for video");
   videoElement.addEventListener("loadedmetadata", () => {
-    console.log("video loadad, adding to grid");
+    console.log("video loaded, adding to grid");
     videoElement.play();
   });
   videos.append(videoElement);
