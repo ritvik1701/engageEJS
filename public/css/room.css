@@ -36,12 +36,13 @@ body {
 }
 
 video {
-  height: 300px;
-  width: 300px;
+  max-height: 300px;
+  min-width: 300px;
+  max-width: 500px !important;
   object-fit: cover;
   border-radius: 10px;
   margin: 10px;
-  /* padding: 3px; */
+  padding: 0 !important;
   border: 7px solid #050505;
 }
 
@@ -62,6 +63,11 @@ video {
 
 .controls {
   /* display: flex; */
+  position: absolute;
+  top: 90%;
+  left: 40%;
+  z-index: 2;
+  transform: translate(-50%, -50%);
   width: fit-content;
   justify-content: center;
   background-color: #111111;
@@ -127,6 +133,14 @@ video {
 .message p {
   margin: 0 !important;
   padding: 0 !important;
+}
+
+.users {
+  color: white;
+}
+
+#video-grid {
+  height: 100%;
 }
 
 #chat {

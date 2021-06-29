@@ -34,11 +34,15 @@
   <body>
     <input type="text" id="roomLink" />
 
-    <%- include('partials/navbar') %>
+    <%- include('partials/navbar') %> <%- include('partials/controls') %>
 
     <div class="container-fluid">
       <div class="row">
-        <div id="video-grid" class="col-12 col-md-9"></div>
+        <div class="col-12 col-md-9">
+          <div class="d-flex justify-content-center align-items-center">
+            <div id="video-grid" class="row"></div>
+          </div>
+        </div>
         <div class="col-12 d-none d-md-block col-md-3 chat-container">
           <div
             id="chat"

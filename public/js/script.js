@@ -14,12 +14,14 @@ const copyRoomInfo = document.querySelector("#copyRoom");
 const sendButton = document.querySelector("#sendButton");
 const chatInput = document.querySelector("#chatInput");
 const chatContent = document.querySelector("#chatContent");
+const userNumber = document.querySelector("#userNumber");
 
 const selfVideo = document.createElement("video");
 selfVideo.setAttribute("poster", "assets/userIcon.png");
 selfVideo.muted = true;
 
 let roomUsers = {};
+let totalUsers = 1;
 
 const videoConstraints = { audio: true, video: true };
 navigator.mediaDevices
@@ -32,6 +34,8 @@ navigator.mediaDevices
     peer.on("call", (call) => {
       console.log("Getting call from PeerID: ", call.peer);
       roomUsers[call.peer] = call;
+      totalUsers += 1;
+      userNumber.innerHTML = totalUsers;
       call.answer(mediaStream);
       console.log("Answering the call");
       const peerVideo = document.createElement("video");
@@ -69,6 +73,8 @@ socket.on("leavingCall", (userPeerID) => {
   if (roomUsers[userPeerID]) {
     console.log("Found video element");
     roomUsers[userPeerID].close();
+    totalUsers -= 1;
+    userNumber.innerHTML = totalUsers;
   } else {
     console.log("Couldn't find element");
   }
@@ -93,6 +99,9 @@ socket.on("newChat", (data) => {
 
 const initializeControls = (mediaStream, selfVideo) => {
   // roomLink.innerHTML = ROOMID;
+
+  userNumber.innerHTML = totalUsers;
+
   tippy("#copyRoom", {
     theme: "light",
     content: "Copy invite link",
@@ -141,6 +150,7 @@ const addStreamToVideoObject = (videoElement, mediaStream) => {
   console.log("Set source object for video");
   videoElement.addEventListener("loadedmetadata", () => {
     console.log("video loaded, adding to grid");
+    videoElement.classList.add("col");
     videoElement.play();
   });
   videos.append(videoElement);
@@ -161,6 +171,8 @@ const callUserWithPeerID = (toCallPeerID, currentUserStream) => {
   });
 
   roomUsers[toCallPeerID] = call;
+  totalUsers += 1;
+  userNumber.innerHTML = totalUsers;
 };
 
 const toggleVideo = (mediaStream, video) => {
