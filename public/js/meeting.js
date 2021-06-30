@@ -4,7 +4,6 @@ const peer = new Peer(undefined, {
   port: 443,
   path: "/",
 });
-
 // get all the elements that need modification
 const socket = io.connect("/");
 const videos = document.querySelector("#video-grid");
@@ -23,6 +22,7 @@ selfVideo.setAttribute("poster", "assets/userIcon.png");
 selfVideo.muted = true;
 
 let roomUsers = {};
+let videoDivMap = {};
 let totalUsers = 1;
 
 // get the media stream for current user, and then set event listeners on socket and peer
@@ -45,15 +45,19 @@ navigator.mediaDevices
       call.answer(mediaStream);
       console.log("Answering the call");
       const peerVideo = document.createElement("video");
+      let i = 0;
       //when you get a reply from the peer who called
       call.on("stream", (peerStream) => {
-        console.log("Got peer video stream");
-        addStreamToVideoObject(peerVideo, peerStream);
+        i += 1;
+        console.log(`Got peer stream ${i}`);
+        if (i % 2 == 0) addStreamToVideoObject(peerVideo, peerStream);
       });
       //when the callee disconnects the call
       call.on("close", () => {
         console.log("closing call");
-        peerVideo.remove();
+        videoDivMap[peerVideo].remove();
+        totalUsers -= 1;
+        userNumber.innerHTML = totalUsers;
       });
     });
 
@@ -86,8 +90,6 @@ socket.on("leavingCall", (userPeerID) => {
   if (roomUsers[userPeerID]) {
     console.log("Found video element");
     roomUsers[userPeerID].close();
-    totalUsers -= 1;
-    userNumber.innerHTML = totalUsers;
   } else {
     console.log("Couldn't find element");
   }
@@ -160,19 +162,20 @@ const initializeControls = (mediaStream, selfVideo) => {
 const callUserWithPeerID = (toCallPeerID, currentUserStream) => {
   const call = peer.call(toCallPeerID, currentUserStream);
   const peerVideo = document.createElement("video");
-  console.log("calling user with peerID: " + toCallPeerID);
+  console.log("calling user with peerID: " + toCallPeerID, call);
   let i = 0;
   call.on("stream", (peerStream) => {
     i += 1;
+    console.log(`Got peer stream ${i}`);
     if (i % 2 == 0) {
-      console.log("Got peer video stream neeche waala");
       addStreamToVideoObject(peerVideo, peerStream);
     }
   });
   call.on("close", () => {
     console.log("closing call");
-    peerVideo.remove();
-    console.log(roomUsers);
+    videoDivMap[peerVideo].remove();
+    totalUsers -= 1;
+    userNumber.innerHTML = totalUsers;
   });
 
   roomUsers[toCallPeerID] = call;
@@ -186,10 +189,18 @@ const addStreamToVideoObject = (videoElement, mediaStream) => {
   console.log("Set source object for video");
   videoElement.addEventListener("loadedmetadata", () => {
     console.log("video loaded, adding to grid");
-    videoElement.classList.add("col");
+    // videoElement.classList.add("col");
     videoElement.play();
-    videos.append(videoElement);
   });
+  const wrapper = document.createElement("div");
+  const username = document.createElement("p");
+  username.innerHTML = USERNAME;
+  wrapper.classList.add("col", "video-wrapper");
+  wrapper.appendChild(videoElement);
+  wrapper.appendChild(username);
+  videoDivMap[videoElement] = wrapper;
+  console.log(videoDivMap);
+  videos.append(wrapper);
 };
 
 const toggleVideo = (mediaStream, video) => {
