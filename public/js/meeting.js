@@ -4,6 +4,8 @@ const peer = new Peer(undefined, {
   port: 443,
   path: "/",
 });
+
+// get all the elements that need modification
 const socket = io.connect("/");
 const videos = document.querySelector("#video-grid");
 const controls = document.querySelector(".controls");
@@ -23,51 +25,62 @@ selfVideo.muted = true;
 let roomUsers = {};
 let totalUsers = 1;
 
+// get the media stream for current user, and then set event listeners on socket and peer
 const videoConstraints = { audio: true, video: true };
 navigator.mediaDevices
   .getUserMedia(videoConstraints)
   .then((mediaStream) => {
     addStreamToVideoObject(selfVideo, mediaStream);
 
+    // set the properties of the controls
     initializeControls(mediaStream, selfVideo);
 
+    // when there is incoming call
     peer.on("call", (call) => {
       console.log("Getting call from PeerID: ", call.peer);
       roomUsers[call.peer] = call;
       totalUsers += 1;
       userNumber.innerHTML = totalUsers;
+      //answer the call
       call.answer(mediaStream);
       console.log("Answering the call");
       const peerVideo = document.createElement("video");
+      //when you get a reply from the peer who called
       call.on("stream", (peerStream) => {
         console.log("Got peer video stream");
         addStreamToVideoObject(peerVideo, peerStream);
       });
+      //when the callee disconnects the call
       call.on("close", () => {
         console.log("closing call");
         peerVideo.remove();
       });
     });
 
+    //when you get a new connection
     socket.on("newConnection", (incomingUserId) => {
       console.log("User with PeerID " + incomingUserId + " joined the room");
       callUserWithPeerID(incomingUserId, mediaStream);
     });
   })
+  //when getting user media fails, or any of the above listeners fail
   .catch((e) => {
     console.log("Error in getting user media: ", e);
     alert("Error getting user audio and video");
   });
 
+// upon current user peerID init
 peer.on("open", (id) => {
   console.log("peer open with id ", id);
   socket.emit("addUserToRoom", peer.id, ROOMID);
 });
 
+// upon current user socket init
 socket.on("connect", () => {
   console.log("Socket connected with id: ", socket.id);
 });
 
+// when a peer leaves the call
 socket.on("leavingCall", (userPeerID) => {
   console.log("recieved leavingCall of peer ", userPeerID);
   if (roomUsers[userPeerID]) {
@@ -80,6 +93,7 @@ socket.on("leavingCall", (userPeerID) => {
   }
 });
 
+// when the socket gets a new chat
 socket.on("newChat", (data) => {
   const content = data.message;
   const user = data.username;
@@ -102,10 +116,6 @@ const initializeControls = (mediaStream, selfVideo) => {
 
   userNumber.innerHTML = totalUsers;
 
-  tippy("#copyRoom", {
-    theme: "light",
-    content: "Copy invite link",
-  });
   tippy("#muteButton", {
     theme: "light",
     content: "Toggle mute",
@@ -120,10 +130,12 @@ const initializeControls = (mediaStream, selfVideo) => {
   });
   copyRoomInfo.addEventListener("click", (e) => {
     let roomInfo = document.querySelector("#roomLink");
+    console.log(roomInfo);
     roomInfo.value = `https://engagecloneritvik.herokuapp.com/${ROOMID}`;
     roomInfo.select();
     roomInfo.setSelectionRange(0, 99999);
     document.execCommand("copy");
+    console.log(roomInfo.value);
   });
   muteButton.addEventListener("click", (e) => {
     toggleAudio(mediaStream);
@@ -144,25 +156,18 @@ const initializeControls = (mediaStream, selfVideo) => {
   });
 };
 
-const addStreamToVideoObject = (videoElement, mediaStream) => {
-  videoElement.setAttribute("poster", "assets/userIcon.png");
-  videoElement.srcObject = mediaStream;
-  console.log("Set source object for video");
-  videoElement.addEventListener("loadedmetadata", () => {
-    console.log("video loaded, adding to grid");
-    videoElement.classList.add("col");
-    videoElement.play();
-  });
-  videos.append(videoElement);
-};
-
+// when you want to call a user with their peerID
 const callUserWithPeerID = (toCallPeerID, currentUserStream) => {
   const call = peer.call(toCallPeerID, currentUserStream);
   const peerVideo = document.createElement("video");
   console.log("calling user with peerID: " + toCallPeerID);
+  let i = 0;
   call.on("stream", (peerStream) => {
-    console.log("Got peer video stream");
-    addStreamToVideoObject(peerVideo, peerStream);
+    i += 1;
+    if (i % 2 == 0) {
+      console.log("Got peer video stream neeche waala");
+      addStreamToVideoObject(peerVideo, peerStream);
+    }
   });
   call.on("close", () => {
     console.log("closing call");
@@ -173,6 +178,18 @@ const callUserWithPeerID = (toCallPeerID, currentUserStream) => {
   roomUsers[toCallPeerID] = call;
   totalUsers += 1;
   userNumber.innerHTML = totalUsers;
+};
+
+const addStreamToVideoObject = (videoElement, mediaStream) => {
+  videoElement.setAttribute("poster", "assets/userIcon.png");
+  videoElement.srcObject = mediaStream;
+  console.log("Set source object for video");
+  videoElement.addEventListener("loadedmetadata", () => {
+    console.log("video loaded, adding to grid");
+    videoElement.classList.add("col");
+    videoElement.play();
+    videos.append(videoElement);
+  });
 };
 
 const toggleVideo = (mediaStream, video) => {

@@ -1,0 +1,70 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
+*:focus {
+  outline: 0 !important;
+}
+
+body {
+  background-color: #28242c;
+  font-family: "Montserrat", sans-serif;
+  overflow-x: hidden;
+}
+
+video {
+  /* max-height: 300px; */
+  min-width: 300px;
+  max-width: 500px !important;
+  object-fit: cover;
+  margin: 10px;
+  padding: 0px !important;
+  border-radius: 10px;
+  border: 5px solid #9a6ab9;
+}
+
+.heading {
+  font-weight: 700;
+  font-size: larger;
+  padding: 10px;
+}
+
+.roomDetails {
+  color: white;
+}
+
+.users {
+  color: white;
+}
+
+#video-grid {
+  height: 100%;
+}
+
+#roomLink {
+  font-size: small;
+  width: 1px;
+  height: 1px;
+  background-color: #28242c;
+  border: none;
+}
+
+#disconnectButton {
+  background-color: #e22f72;
+}
+
+#copyRoom {
+  background-color: #111111;
+  border: none;
+  border-radius: 50px;
+  height: fit-content;
+  width: fit-content;
+  padding: 10px;
+  color: white;
+}
+
+#roomLink {
+  position: absolute;
+  height: 0;
+}

@@ -14,7 +14,7 @@
       defer
     ></script>
     <script src="/socket.io/socket.io.js" defer></script>
-    <script src="js/script.js" defer></script>
+    <script src="js/meeting.js" defer></script>
     <link
       rel="stylesheet"
       href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
@@ -29,12 +29,14 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
-    <link rel="stylesheet" href="css/room.css" />
+    <link rel="stylesheet" href="css/meeting/room.css" />
+    <link rel="stylesheet" href="css/meeting/chat.css" />
+    <link rel="stylesheet" href="css/meeting/controls.css" />
   </head>
   <body>
     <input type="text" id="roomLink" />
 
-    <%- include('partials/navbar') %> <%- include('partials/controls') %>
+    <%- include('partials/controls') %>
 
     <div class="container-fluid">
       <div class="row">
@@ -43,32 +45,7 @@
             <div id="video-grid" class="row"></div>
           </div>
         </div>
-        <div class="col-12 d-none d-md-block col-md-3 chat-container">
-          <div
-            id="chat"
-            class="d-flex align-items-start flex-column justify-content-end"
-          >
-            <div id="chatContent"></div>
-            <div class="input-group">
-              <input
-                type="text"
-                class="form-control"
-                placeholder="Enter message"
-                aria-describedby="sendButton"
-                id="chatInput"
-              />
-              <div class="input-group-append">
-                <button
-                  class="btn btn-outline-secondary chat-send"
-                  type="button"
-                  id="sendButton"
-                >
-                  <i class="fas fa-paper-plane"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <%- include('partials/chatContainer') %>
       </div>
     </div>
 

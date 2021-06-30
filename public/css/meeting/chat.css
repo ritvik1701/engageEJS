@@ -1,0 +1,73 @@
+.form-control {
+  background-color: #202020;
+  border: none;
+  border-bottom: 2px solid #9708cc;
+  color: white;
+  border-radius: 0;
+}
+
+.chat-send {
+  border: 2px solid #9708cc;
+  color: white;
+}
+
+.message {
+  padding: 10px;
+  margin: 0 15px;
+  background-color: #1b1b1b;
+  color: white;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-left: 2px solid #9708cc;
+  margin-bottom: 10px;
+}
+
+.message h5 {
+  font-size: 17px;
+  font-weight: bold;
+  width: 100%;
+}
+
+.message p {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100%;
+  overflow-wrap: break-word;
+}
+
+#chat {
+  background-color: #111111;
+  min-height: 95vh;
+  width: 100%;
+  margin-top: 17px;
+  border-radius: 15px;
+}
+
+#chatContent {
+  height: 80vh;
+  width: 100%;
+  overflow: auto;
+  /* background-color: rebeccapurple; */
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #45055c;
+  border-radius: 8px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #9708cc;
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #b635e6;
+}
