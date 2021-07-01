@@ -1,3 +1,10 @@
+import {
+  toggleVideo,
+  toggleAudio,
+  raiseHandHandler,
+  disconnectCall,
+} from "./modules/controlHandler.js";
+
 const peer = new Peer(undefined, {
   host: "peerjsritvik.herokuapp.com",
   secure: true,
@@ -7,7 +14,7 @@ const peer = new Peer(undefined, {
 // get all the elements that need modification
 const socket = io.connect("/");
 const videos = document.querySelector("#video-grid");
-const controls = document.querySelector(".controls");
+// const controls = document.querySelector(".controls");
 const muteButton = document.querySelector("#muteButton");
 const videoButton = document.querySelector("#videoButton");
 const disconnectButton = document.querySelector("#disconnectButton");
@@ -87,12 +94,7 @@ socket.on("connect", () => {
 
 socket.on("raiseHand", (peerID) => {
   console.log("someone raised hand ", roomUsers[peerID].peerVideo);
-  let vid = roomUsers[peerID].peerVideo;
-  if (vid.classList.contains("raised")) {
-    vid.classList.replace("raised", "unraised");
-  } else {
-    vid.classList.replace("unraised", "raised");
-  }
+  raiseHandHandler(roomUsers[peerID].peerVideo);
 });
 
 // when a peer leaves the call
@@ -151,13 +153,13 @@ const initializeControls = (mediaStream, selfVideo) => {
     console.log(roomInfo.value);
   });
   muteButton.addEventListener("click", (e) => {
-    toggleAudio(mediaStream);
+    toggleAudio(mediaStream, muteButton);
   });
   videoButton.addEventListener("click", (e) => {
-    toggleVideo(mediaStream, selfVideo);
+    toggleVideo(mediaStream, videoButton);
   });
   disconnectButton.addEventListener("click", (e) => {
-    disconnectCall();
+    disconnectCall(socket, peer);
   });
   sendButton.addEventListener("click", (e) => {
     const message = chatInput.value;
@@ -207,6 +209,7 @@ const addStreamToVideoObject = (videoElement, mediaStream) => {
   videoElement.classList.add("unraised");
   videoElement.setAttribute("poster", "assets/userIcon.png");
   videoElement.srcObject = mediaStream;
+  console.log(mediaStream.getAudioTracks());
   console.log("Set source object for video");
   videoElement.addEventListener("loadedmetadata", () => {
     console.log("video loaded, adding to grid");
@@ -222,34 +225,4 @@ const addStreamToVideoObject = (videoElement, mediaStream) => {
   videoDivMap[videoElement] = wrapper;
   console.log(videoDivMap);
   videos.append(wrapper);
-};
-
-const toggleVideo = (mediaStream, video) => {
-  mediaStream.getVideoTracks()[0].enabled =
-    !mediaStream.getVideoTracks()[0].enabled;
-  if (videoButton.classList.contains("selected")) {
-    videoButton.classList.remove("selected");
-    videoButton.classList.add("deselected");
-  } else {
-    videoButton.classList.remove("deselected");
-    videoButton.classList.add("selected");
-  }
-};
-
-const toggleAudio = (mediaStream) => {
-  mediaStream.getAudioTracks()[0].enabled =
-    !mediaStream.getAudioTracks()[0].enabled;
-  if (muteButton.classList.contains("selected")) {
-    muteButton.classList.remove("selected");
-    muteButton.classList.add("deselected");
-  } else {
-    muteButton.classList.remove("deselected");
-    muteButton.classList.add("selected");
-  }
-};
-
-const disconnectCall = () => {
-  socket.emit("pressedDisconnectButton", peer.id);
-  console.log("emitted disconnectButton event");
-  window.location.replace("/");
 };

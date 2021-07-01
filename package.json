@@ -19,15 +19,11 @@
   },
   "homepage": "https://github.com/ritvik1701/engageSocketServer#readme",
   "dependencies": {
-    "dotenv": "^10.0.0",
     "ejs": "^3.1.6",
     "express": "^4.17.1",
-    "nedb": "^1.8.0",
-    "passport-google-oauth20": "^2.0.0",
     "peer": "^0.6.1",
     "socket.io": "^4.1.2",
-    "uuid": "^8.3.2",
-    "wavify": "^1.0.0"
+    "uuid": "^8.3.2"
   },
   "engines": {
     "node": "14.x"
