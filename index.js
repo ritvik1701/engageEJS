@@ -32,6 +32,7 @@ io.on("connection", (socket) => {
   socket.on("data", (data) => {
     io.emit("newChat", data);
   });
+
   socket.on("addUserToRoom", (userPeerID, roomId) => {
     socket.join(roomId);
     socket.broadcast.to(roomId).emit("newConnection", userPeerID);

@@ -8,11 +8,34 @@
     <script>
       const ROOMID = "<%= roomId %>";
     </script>
+    <%- include('partials/bootstrapInit') %>
+    <script src="/socket.io/socket.io.js" defer></script>
     <script src="js/home.js" defer></script>
+
+    <link rel="stylesheet" href="css/homepage/home.css" />
   </head>
   <body>
-    <h1>HELLO</h1>
-    <button id="newRoomBtn">NEW ROOM</button>
-    <script></script>
+    <div class="content d-flex align-items-center justify-content-center">
+      <div class="meetDetails">
+        <h1 id="intro">Welcome!</h1>
+        <label class="mr-3" for="username">Username: </label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          placeholder="CornSaladUwU"
+        /><br />
+        <button id="newRoomBtn" class="hvr-sweep-to-right">New Meeting</button>
+      </div>
+    </div>
+    <div class="footer d-flex align-items-end">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+        <path
+          fill="#9708CC"
+          fill-opacity="1"
+          d="M0,256L60,229.3C120,203,240,149,360,112C480,75,600,53,720,74.7C840,96,960,160,1080,176C1200,192,1320,160,1380,144L1440,128L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"
+        ></path>
+      </svg>
+    </div>
   </body>
 </html>
