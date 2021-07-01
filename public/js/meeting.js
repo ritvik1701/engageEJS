@@ -16,6 +16,7 @@ const sendButton = document.querySelector("#sendButton");
 const chatInput = document.querySelector("#chatInput");
 const chatContent = document.querySelector("#chatContent");
 const userNumber = document.querySelector("#userNumber");
+const handButton = document.querySelector("#handButton");
 
 const selfVideo = document.createElement("video");
 selfVideo.setAttribute("poster", "assets/userIcon.png");
@@ -38,13 +39,13 @@ navigator.mediaDevices
     // when there is incoming call
     peer.on("call", (call) => {
       console.log("Getting call from PeerID: ", call.peer);
-      roomUsers[call.peer] = call;
       totalUsers += 1;
       userNumber.innerHTML = totalUsers;
       //answer the call
       call.answer(mediaStream);
       console.log("Answering the call");
       const peerVideo = document.createElement("video");
+      roomUsers[call.peer] = { call, peerVideo };
       let i = 0;
       //when you get a reply from the peer who called
       call.on("stream", (peerStream) => {
@@ -84,12 +85,22 @@ socket.on("connect", () => {
   console.log("Socket connected with id: ", socket.id);
 });
 
+socket.on("raiseHand", (peerID) => {
+  console.log("someone raised hand ", roomUsers[peerID].peerVideo);
+  let vid = roomUsers[peerID].peerVideo;
+  if (vid.classList.contains("raised")) {
+    vid.classList.replace("raised", "unraised");
+  } else {
+    vid.classList.replace("unraised", "raised");
+  }
+});
+
 // when a peer leaves the call
 socket.on("leavingCall", (userPeerID) => {
   console.log("recieved leavingCall of peer ", userPeerID);
-  if (roomUsers[userPeerID]) {
+  if (roomUsers[userPeerID].call) {
     console.log("Found video element");
-    roomUsers[userPeerID].close();
+    roomUsers[userPeerID].call.close();
   } else {
     console.log("Couldn't find element");
   }
@@ -156,6 +167,15 @@ const initializeControls = (mediaStream, selfVideo) => {
       chatInput.value = "";
     }
   });
+  handButton.addEventListener("click", (e) => {
+    console.log("Emitting raiseHand");
+    socket.emit("raiseHand", peer.id);
+    if (selfVideo.classList.contains("raised")) {
+      selfVideo.classList.replace("raised", "unraised");
+    } else {
+      selfVideo.classList.replace("unraised", "raised");
+    }
+  });
 };
 
 // when you want to call a user with their peerID
@@ -178,12 +198,13 @@ const callUserWithPeerID = (toCallPeerID, currentUserStream) => {
     userNumber.innerHTML = totalUsers;
   });
 
-  roomUsers[toCallPeerID] = call;
+  roomUsers[toCallPeerID] = { call, peerVideo };
   totalUsers += 1;
   userNumber.innerHTML = totalUsers;
 };
 
 const addStreamToVideoObject = (videoElement, mediaStream) => {
+  videoElement.classList.add("unraised");
   videoElement.setAttribute("poster", "assets/userIcon.png");
   videoElement.srcObject = mediaStream;
   console.log("Set source object for video");

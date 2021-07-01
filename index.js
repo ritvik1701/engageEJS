@@ -42,6 +42,11 @@ io.on("connection", (socket) => {
       socket.broadcast.to(roomId).emit("leavingCall", userPeerID);
     });
 
+    socket.on("raiseHand", (peerID) => {
+      console.log("Peer " + peerID + " raised hand, emitting");
+      socket.broadcast.to(roomId).emit("raiseHand", peerID);
+    });
+
     socket.on("pressedDisconnectButton", (peerid) => {
       console.log("recieved disconnectButton");
       socket.broadcast.to(roomId).emit("leavingCall", peerid);

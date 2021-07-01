@@ -30,7 +30,14 @@ body {
   /* margin: 10px; */
   padding: 0px !important;
   border-radius: 10px;
+}
+
+.unraised {
   border: 5px solid #00e1bf;
+}
+
+.raised {
+  border: 5px solid #e22f72;
 }
 
 .video-wrapper p {
