@@ -10,6 +10,9 @@ const peer = new Peer(undefined, {
   port: 443,
   path: "/",
 });
+
+import { stt } from "./modules/speechRecognition.js";
+
 // get all the elements that need modification
 const socket = io.connect("/");
 const videos = document.querySelector("#video-grid");
@@ -30,7 +33,8 @@ selfVideo.muted = true;
 let roomUsers = {};
 let videoDivMap = {};
 let totalUsers = 1;
-let enableDetection = true;
+let enableDetection = false;
+let handNotif = new Audio("../assets/handRaise.mp3");
 
 // get the media stream for current user, and then set event listeners on socket and peer
 const videoConstraints = { audio: true, video: true };
@@ -51,7 +55,7 @@ navigator.mediaDevices
       call.answer(mediaStream);
       console.log("Answering the call");
       const peerVideo = document.createElement("video");
-      roomUsers[call.peer] = { call, peerVideo };
+      roomUsers[call.peer] = { call, peerVideo, handRaiseCount: 0 };
       let i = 0;
       //when you get a reply from the peer who called
       call.on("stream", (peerStream) => {
@@ -94,6 +98,8 @@ socket.on("connect", () => {
 socket.on("raiseHand", (peerID) => {
   console.log("someone raised hand ", roomUsers[peerID].peerVideo);
   raiseHandHandler(roomUsers[peerID].peerVideo);
+  roomUsers[peerID].handRaiseCount += 1;
+  if (roomUsers[peerID].handRaiseCount % 2 != 0) handNotif.play();
 });
 
 // when a peer leaves the call
@@ -111,14 +117,18 @@ socket.on("leavingCall", (userPeerID) => {
 socket.on("newChat", (data) => {
   const content = data.message;
   const user = data.username;
+  const system = data.system;
   const message = document.createElement("div");
+  message.classList.add("message");
   const para = document.createElement("p");
   para.innerHTML = content;
-  const header = document.createElement("h5");
-  header.innerHTML = user;
-
-  message.classList.add("message");
-  message.appendChild(header);
+  if (!system) {
+    const header = document.createElement("h5");
+    header.innerHTML = user;
+    message.appendChild(header);
+  } else {
+    message.classList.add("system");
+  }
   message.appendChild(para);
 
   chatContent.appendChild(message);
@@ -138,9 +148,19 @@ let detectionStopped = false;
 let handRaised = false;
 
 const handDetectionHandler = () => {
+  if (enableDetection)
+    ohSnap("Enabling gestures...", {
+      color: "yellow",
+      duration: "1500",
+    });
   handTrack.startVideo(selfVideo).then((status) => {
     if (status) {
       console.log("detection starting");
+      if (enableDetection)
+        ohSnap("Gestures enabled!", {
+          color: "green",
+          duration: "1500",
+        });
       let interval = setInterval(() => {
         if (detectionStopped || !enableDetection) {
           console.log("clearing interval of detection");
@@ -206,6 +226,7 @@ const initializeControls = (mediaStream, selfVideo) => {
     ohSnap("Toggling mute", { color: "red", duration: "1000" });
   });
   videoButton.addEventListener("click", (e) => {
+    ohSnap("Toggling video", { color: "red", duration: "1000" });
     mediaStream.getVideoTracks()[0].enabled =
       !mediaStream.getVideoTracks()[0].enabled;
     if (videoButton.classList.contains("selected")) {
@@ -220,7 +241,6 @@ const initializeControls = (mediaStream, selfVideo) => {
       model.dispose();
       detectionStopped = true;
     }
-    ohSnap("Toggling video", { color: "red", duration: "1000" });
   });
   disconnectButton.addEventListener("click", (e) => {
     disconnectCall(socket, peer);
@@ -229,16 +249,16 @@ const initializeControls = (mediaStream, selfVideo) => {
     const message = chatInput.value;
     if (message !== "") {
       const username = USERNAME;
-      socket.emit("data", { username, message });
+      socket.emit("data", { username, message, system: false });
       chatInput.value = "";
     }
   });
   handButton.addEventListener("click", (e) => {
-    selfRaiseHand();
     ohSnap("Toggling hand raise", { color: "red", duration: "1000" });
+    selfRaiseHand();
   });
   gestureButton.addEventListener("click", (e) => {
-    ohSnap("Toggling gestures", { color: "red", duration: "1000" });
+    // ohSnap("Toggling gestures", { color: "red", duration: "1000" });
     console.log("Toggling gestures");
     if (gestureButton.classList.contains("selected")) {
       gestureButton.classList.remove("selected");
@@ -273,7 +293,7 @@ const callUserWithPeerID = (toCallPeerID, currentUserStream) => {
     userNumber.innerHTML = totalUsers;
   });
 
-  roomUsers[toCallPeerID] = { call, peerVideo };
+  roomUsers[toCallPeerID] = { call, peerVideo, handRaiseCount: 0 };
   totalUsers += 1;
   userNumber.innerHTML = totalUsers;
 };
@@ -311,6 +331,11 @@ const selfRaiseHand = () => {
     handRaised = false;
   } else {
     selfVideo.classList.replace("unraised", "raised");
+    socket.emit("data", {
+      username: "SYSTEM",
+      message: `${USERNAME} raised hand`,
+      system: true,
+    });
     handRaised = true;
   }
   if (handButton.classList.contains("selected")) {
@@ -321,3 +346,5 @@ const selfRaiseHand = () => {
     handButton.classList.add("selected");
   }
 };
+
+stt();
