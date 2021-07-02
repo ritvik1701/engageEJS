@@ -1,15 +1,12 @@
-<div class="controls-container">
+<div class="controls-container d-flex">
   <div class="controls">
-    <div class="roomDetails d-inline-block">
-      <button id="copyRoom">
+    <div class="roomDetails">
+      <!-- <button id="copyRoom">
         <span class="heading">Invite</span>
         <i class="fas fa-user-plus fa-md mr-2"></i>
-      </button>
+      </button> -->
       <!-- <span id="roomLink"></span> -->
     </div>
-    <button class="deselected" id="handButton">
-      <i class="fas fa-hand-paper fa-lg"></i>
-    </button>
     <button class="deselected" id="muteButton">
       <i class="fas fa-microphone-slash fa-lg"></i>
     </button>
@@ -18,6 +15,14 @@
     </button>
     <button class="selected" id="disconnectButton">
       <i class="fas fa-phone-slash fa-lg"></i>
+    </button>
+  </div>
+  <div class="controls">
+    <button class="deselected" id="handButton">
+      <i class="fas fa-hand-paper fa-lg"></i>
+    </button>
+    <button class="deselected" id="gestureButton">
+      <i class="fas fa-hand-sparkles fa-lg"></i>
     </button>
     <div class="users mx-2 mr-3 d-inline-block">
       <span id="userNumber" class="heading"></span>

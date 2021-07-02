@@ -1,4 +1,4 @@
-export const toggleVideo = (mediaStream, videoButton) => {
+export const toggleVideo = (mediaStream, videoButton, selfVideo) => {
   mediaStream.getVideoTracks()[0].enabled =
     !mediaStream.getVideoTracks()[0].enabled;
   if (videoButton.classList.contains("selected")) {
@@ -7,6 +7,7 @@ export const toggleVideo = (mediaStream, videoButton) => {
   } else {
     videoButton.classList.remove("deselected");
     videoButton.classList.add("selected");
+    handTrack.stopVideo(selfVideo);
   }
 };
 

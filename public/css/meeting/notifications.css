@@ -1,0 +1,40 @@
+#ohsnap {
+  position: absolute;
+  top: 82vh;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.alert {
+  border: 1px solid #eed3d7;
+  width: 100%;
+  float: right;
+  clear: right;
+  background-color: white;
+}
+
+.alert-red {
+  color: white;
+  background-color: #da4453;
+  background-color: #9808cc65;
+  border-radius: 5px;
+  border: 3px solid #9708cc;
+  color: white;
+  border-radius: 40px;
+}
+.alert-green {
+  color: white;
+  background-color: #37bc9b;
+}
+.alert-blue {
+  color: white;
+  background-color: #4a89dc;
+}
+.alert-yellow {
+  color: white;
+  background-color: #f6bb42;
+}
+.alert-orange {
+  color: white;
+  background-color: #e9573f;
+}

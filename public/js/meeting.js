@@ -14,16 +14,15 @@ const peer = new Peer(undefined, {
 // get all the elements that need modification
 const socket = io.connect("/");
 const videos = document.querySelector("#video-grid");
-// const controls = document.querySelector(".controls");
 const muteButton = document.querySelector("#muteButton");
 const videoButton = document.querySelector("#videoButton");
 const disconnectButton = document.querySelector("#disconnectButton");
-const copyRoomInfo = document.querySelector("#copyRoom");
 const sendButton = document.querySelector("#sendButton");
 const chatInput = document.querySelector("#chatInput");
 const chatContent = document.querySelector("#chatContent");
 const userNumber = document.querySelector("#userNumber");
 const handButton = document.querySelector("#handButton");
+const gestureButton = document.querySelector("#gestureButton");
 
 const selfVideo = document.createElement("video");
 selfVideo.setAttribute("poster", "assets/userIcon.png");
@@ -32,13 +31,14 @@ selfVideo.muted = true;
 let roomUsers = {};
 let videoDivMap = {};
 let totalUsers = 1;
+let enableDetection = true;
 
 // get the media stream for current user, and then set event listeners on socket and peer
 const videoConstraints = { audio: true, video: true };
 navigator.mediaDevices
   .getUserMedia(videoConstraints)
   .then((mediaStream) => {
-    addStreamToVideoObject(selfVideo, mediaStream);
+    addStreamToVideoObject(selfVideo, mediaStream, true);
 
     // set the properties of the controls
     initializeControls(mediaStream, selfVideo);
@@ -126,6 +126,41 @@ socket.on("newChat", (data) => {
   chatContent.scrollTop = chatContent.scrollHeight;
 });
 
+const modelParams = {
+  flipHorizontal: true, // flip e.g for video
+  imageScaleFactor: 0.7, // reduce input image size .
+  maxNumBoxes: 3, // maximum number of boxes to detect
+  iouThreshold: 0.5, // ioU threshold for non-max suppression
+  scoreThreshold: 0.83, // confidence threshold for predictions.
+};
+
+let model;
+let detectionStopped = false;
+
+const handDetectionHandler = () => {
+  handTrack.startVideo(selfVideo).then((status) => {
+    if (status) {
+      console.log("detection starting");
+      let interval = setInterval(() => {
+        if (detectionStopped || !enableDetection) {
+          console.log("clearing interval of detection");
+          clearInterval(interval);
+        } else {
+          startDetection();
+        }
+      }, 1000);
+    }
+  });
+  const startDetection = () => {
+    model.detect(selfVideo).then((predictions) => {
+      console.log(predictions);
+    });
+  };
+  handTrack.load(modelParams).then((loadedModel) => {
+    model = loadedModel;
+  });
+};
+
 const initializeControls = (mediaStream, selfVideo) => {
   // roomLink.innerHTML = ROOMID;
 
@@ -143,20 +178,43 @@ const initializeControls = (mediaStream, selfVideo) => {
     theme: "light",
     content: "Disconnect",
   });
-  copyRoomInfo.addEventListener("click", (e) => {
-    let roomInfo = document.querySelector("#roomLink");
-    console.log(roomInfo);
-    roomInfo.value = `https://engagecloneritvik.herokuapp.com/${ROOMID}`;
-    roomInfo.select();
-    roomInfo.setSelectionRange(0, 99999);
-    document.execCommand("copy");
-    console.log(roomInfo.value);
+  tippy("#handButton", {
+    theme: "light",
+    content: "Raise hand",
   });
+  tippy("#gestureButton", {
+    theme: "light",
+    content: "Enable gestures",
+  });
+  // copyRoomInfo.addEventListener("click", (e) => {
+  //   let roomInfo = document.querySelector("#roomLink");
+  //   console.log(roomInfo);
+  //   roomInfo.value = `https://engagecloneritvik.herokuapp.com/${ROOMID}`;
+  //   roomInfo.select();
+  //   roomInfo.setSelectionRange(0, 99999);
+  //   document.execCommand("copy");
+  //   console.log(roomInfo.value);
+  // });
   muteButton.addEventListener("click", (e) => {
     toggleAudio(mediaStream, muteButton);
+    ohSnap("Toggling mute", { color: "red", duration: "1000" });
   });
   videoButton.addEventListener("click", (e) => {
-    toggleVideo(mediaStream, videoButton);
+    mediaStream.getVideoTracks()[0].enabled =
+      !mediaStream.getVideoTracks()[0].enabled;
+    if (videoButton.classList.contains("selected")) {
+      videoButton.classList.remove("selected");
+      videoButton.classList.add("deselected");
+      detectionStopped = false;
+      handDetectionHandler();
+    } else {
+      videoButton.classList.remove("deselected");
+      videoButton.classList.add("selected");
+      handTrack.stopVideo(selfVideo);
+      model.dispose();
+      detectionStopped = true;
+    }
+    ohSnap("Toggling video", { color: "red", duration: "1000" });
   });
   disconnectButton.addEventListener("click", (e) => {
     disconnectCall(socket, peer);
@@ -176,6 +234,28 @@ const initializeControls = (mediaStream, selfVideo) => {
       selfVideo.classList.replace("raised", "unraised");
     } else {
       selfVideo.classList.replace("unraised", "raised");
+    }
+    if (handButton.classList.contains("selected")) {
+      handButton.classList.remove("selected");
+      handButton.classList.add("deselected");
+    } else {
+      handButton.classList.remove("deselected");
+      handButton.classList.add("selected");
+    }
+    ohSnap("Toggling hand raise", { color: "red", duration: "1000" });
+  });
+  gestureButton.addEventListener("click", (e) => {
+    ohSnap("Toggling gestures", { color: "red", duration: "1000" });
+    console.log("Toggling gestures");
+    if (gestureButton.classList.contains("selected")) {
+      gestureButton.classList.remove("selected");
+      gestureButton.classList.add("deselected");
+      enableDetection = false;
+    } else {
+      gestureButton.classList.remove("deselected");
+      gestureButton.classList.add("selected");
+      enableDetection = true;
+      handDetectionHandler();
     }
   });
 };
@@ -205,7 +285,7 @@ const callUserWithPeerID = (toCallPeerID, currentUserStream) => {
   userNumber.innerHTML = totalUsers;
 };
 
-const addStreamToVideoObject = (videoElement, mediaStream) => {
+const addStreamToVideoObject = (videoElement, mediaStream, isSelf = false) => {
   videoElement.classList.add("unraised");
   videoElement.setAttribute("poster", "assets/userIcon.png");
   videoElement.srcObject = mediaStream;
@@ -213,7 +293,6 @@ const addStreamToVideoObject = (videoElement, mediaStream) => {
   console.log("Set source object for video");
   videoElement.addEventListener("loadedmetadata", () => {
     console.log("video loaded, adding to grid");
-    // videoElement.classList.add("col");
     videoElement.play();
   });
   const wrapper = document.createElement("div");
@@ -222,6 +301,10 @@ const addStreamToVideoObject = (videoElement, mediaStream) => {
   wrapper.classList.add("col", "video-wrapper");
   wrapper.appendChild(videoElement);
   wrapper.appendChild(username);
+  if (isSelf) {
+    wrapper.classList.add("selfVideo");
+    username.innerHTML = "You";
+  }
   videoDivMap[videoElement] = wrapper;
   console.log(videoDivMap);
   videos.append(wrapper);
