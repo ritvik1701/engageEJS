@@ -1,5 +1,4 @@
 import {
-  toggleVideo,
   toggleAudio,
   raiseHandHandler,
   disconnectCall,
@@ -136,6 +135,7 @@ const modelParams = {
 
 let model;
 let detectionStopped = false;
+let handRaised = false;
 
 const handDetectionHandler = () => {
   handTrack.startVideo(selfVideo).then((status) => {
@@ -154,6 +154,12 @@ const handDetectionHandler = () => {
   const startDetection = () => {
     model.detect(selfVideo).then((predictions) => {
       console.log(predictions);
+      predictions.forEach((prediction) => {
+        if (prediction.label === "open" && !handRaised) {
+          handRaised = true;
+          selfRaiseHand();
+        }
+      });
     });
   };
   handTrack.load(modelParams).then((loadedModel) => {
@@ -228,20 +234,7 @@ const initializeControls = (mediaStream, selfVideo) => {
     }
   });
   handButton.addEventListener("click", (e) => {
-    console.log("Emitting raiseHand");
-    socket.emit("raiseHand", peer.id);
-    if (selfVideo.classList.contains("raised")) {
-      selfVideo.classList.replace("raised", "unraised");
-    } else {
-      selfVideo.classList.replace("unraised", "raised");
-    }
-    if (handButton.classList.contains("selected")) {
-      handButton.classList.remove("selected");
-      handButton.classList.add("deselected");
-    } else {
-      handButton.classList.remove("deselected");
-      handButton.classList.add("selected");
-    }
+    selfRaiseHand();
     ohSnap("Toggling hand raise", { color: "red", duration: "1000" });
   });
   gestureButton.addEventListener("click", (e) => {
@@ -308,4 +301,23 @@ const addStreamToVideoObject = (videoElement, mediaStream, isSelf = false) => {
   videoDivMap[videoElement] = wrapper;
   console.log(videoDivMap);
   videos.append(wrapper);
+};
+
+const selfRaiseHand = () => {
+  console.log("Emitting raiseHand");
+  socket.emit("raiseHand", peer.id);
+  if (selfVideo.classList.contains("raised")) {
+    selfVideo.classList.replace("raised", "unraised");
+    handRaised = false;
+  } else {
+    selfVideo.classList.replace("unraised", "raised");
+    handRaised = true;
+  }
+  if (handButton.classList.contains("selected")) {
+    handButton.classList.remove("selected");
+    handButton.classList.add("deselected");
+  } else {
+    handButton.classList.remove("deselected");
+    handButton.classList.add("selected");
+  }
 };
