@@ -23,9 +23,26 @@
   margin-bottom: 10px;
 }
 
+.caption {
+  width: 100%;
+  padding-right: 30px;
+}
+
+.stt {
+  border: none;
+  outline: none;
+  width: 100%;
+}
+
+.caption .heading {
+  color: white;
+  margin-left: 10px;
+  margin-bottom: 0px;
+}
+
 .system {
   border-left: 5px solid #f6bb42;
-  background-color: #f6ba4281;
+  background-color: #f6ba423d;
 }
 
 .message h5 {
@@ -50,7 +67,7 @@
 }
 
 #chatContent {
-  height: 80vh;
+  height: 60vh;
   width: 100%;
   overflow: auto;
   /* background-color: rebeccapurple; */

@@ -40,7 +40,7 @@ body {
   position: absolute;
   min-width: 150px;
   min-height: 150px;
-  top: 0%;
+  bottom: 10%;
   left: 0%;
 }
 

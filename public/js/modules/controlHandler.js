@@ -36,3 +36,34 @@ export const disconnectCall = (socket, peer) => {
   console.log("emitted disconnectButton event");
   window.location.replace("/");
 };
+
+export const tippyHandler = () => {
+  tippy("#muteButton", {
+    theme: "light",
+    content: "Toggle mute",
+  });
+  tippy("#videoButton", {
+    theme: "light",
+    content: "Toggle video",
+  });
+  tippy("#disconnectButton", {
+    theme: "light",
+    content: "Disconnect",
+  });
+  tippy("#handButton", {
+    theme: "light",
+    content: "Raise hand",
+  });
+  tippy("#gestureButton", {
+    theme: "light",
+    content: "Enable gestures",
+  });
+  tippy("#captionButton", {
+    theme: "light",
+    content: "Live captioning",
+  });
+  tippy("#screenshareButton", {
+    theme: "light",
+    content: "Screen share",
+  });
+};

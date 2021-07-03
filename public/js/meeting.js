@@ -2,6 +2,7 @@ import {
   toggleAudio,
   raiseHandHandler,
   disconnectCall,
+  tippyHandler,
 } from "./modules/controlHandler.js";
 
 const peer = new Peer(undefined, {
@@ -11,7 +12,7 @@ const peer = new Peer(undefined, {
   path: "/",
 });
 
-import { stt } from "./modules/speechRecognition.js";
+import { stt, sttStop } from "./modules/speechRecognition.js";
 
 // get all the elements that need modification
 const socket = io.connect("/");
@@ -25,6 +26,8 @@ const chatContent = document.querySelector("#chatContent");
 const userNumber = document.querySelector("#userNumber");
 const handButton = document.querySelector("#handButton");
 const gestureButton = document.querySelector("#gestureButton");
+const captionButton = document.querySelector("#captionButton");
+const screenshareButton = document.querySelector("#screenshareButton");
 
 const selfVideo = document.createElement("video");
 selfVideo.setAttribute("poster", "assets/userIcon.png");
@@ -192,26 +195,7 @@ const initializeControls = (mediaStream, selfVideo) => {
 
   userNumber.innerHTML = totalUsers;
 
-  tippy("#muteButton", {
-    theme: "light",
-    content: "Toggle mute",
-  });
-  tippy("#videoButton", {
-    theme: "light",
-    content: "Toggle video",
-  });
-  tippy("#disconnectButton", {
-    theme: "light",
-    content: "Disconnect",
-  });
-  tippy("#handButton", {
-    theme: "light",
-    content: "Raise hand",
-  });
-  tippy("#gestureButton", {
-    theme: "light",
-    content: "Enable gestures",
-  });
+  tippyHandler();
   // copyRoomInfo.addEventListener("click", (e) => {
   //   let roomInfo = document.querySelector("#roomLink");
   //   console.log(roomInfo);
@@ -238,7 +222,7 @@ const initializeControls = (mediaStream, selfVideo) => {
       videoButton.classList.remove("deselected");
       videoButton.classList.add("selected");
       handTrack.stopVideo(selfVideo);
-      model.dispose();
+      if (model) model.dispose();
       detectionStopped = true;
     }
   });
@@ -264,11 +248,24 @@ const initializeControls = (mediaStream, selfVideo) => {
       gestureButton.classList.remove("selected");
       gestureButton.classList.add("deselected");
       enableDetection = false;
+      ohSnap("Disabling gestures", { color: "red", duration: "1000" });
     } else {
       gestureButton.classList.remove("deselected");
       gestureButton.classList.add("selected");
       enableDetection = true;
       handDetectionHandler();
+    }
+  });
+  captionButton.addEventListener("click", (e) => {
+    console.log("Toggling captions");
+    if (captionButton.classList.contains("selected")) {
+      captionButton.classList.remove("selected");
+      captionButton.classList.add("deselected");
+      sttStop();
+    } else {
+      captionButton.classList.remove("deselected");
+      captionButton.classList.add("selected");
+      stt(captionButton);
     }
   });
 };
@@ -315,7 +312,7 @@ const addStreamToVideoObject = (videoElement, mediaStream, isSelf = false) => {
   wrapper.appendChild(videoElement);
   wrapper.appendChild(username);
   if (isSelf) {
-    wrapper.classList.add("selfVideo");
+    wrapper.classList.add("selfVideo", "d-none", "d-md-block");
     username.innerHTML = "You";
   }
   videoDivMap[videoElement] = wrapper;
@@ -346,5 +343,3 @@ const selfRaiseHand = () => {
     handButton.classList.add("selected");
   }
 };
-
-stt();

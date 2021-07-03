@@ -4,7 +4,19 @@
     class="d-flex align-items-start flex-column justify-content-end"
   >
     <div id="chatContent"></div>
-    <textarea name="sttResult" id="sttResult" cols="30" rows="10"></textarea>
+    <div class="caption">
+      <h5 class="heading">Live Caption</h5>
+      <textarea
+        name="sttResult"
+        id="sttResult"
+        class="message stt system d-block"
+      ></textarea>
+      <textarea
+        name="sttResult"
+        id="translatedResult"
+        class="message stt system d-block"
+      ></textarea>
+    </div>
     <div class="input-group">
       <input
         type="text"
