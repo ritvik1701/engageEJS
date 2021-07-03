@@ -28,6 +28,8 @@ const handButton = document.querySelector("#handButton");
 const gestureButton = document.querySelector("#gestureButton");
 const captionButton = document.querySelector("#captionButton");
 const screenshareButton = document.querySelector("#screenshareButton");
+const results = document.querySelector("#sttResult");
+const translatedResults = document.querySelector("#translatedResult");
 
 const selfVideo = document.createElement("video");
 selfVideo.setAttribute("poster", "assets/userIcon.png");
@@ -39,13 +41,14 @@ let totalUsers = 1;
 let enableDetection = false;
 let handNotif = new Audio("../assets/handRaise.mp3");
 
+// ---------------------- STARTING THE CALL ------------------------
 // get the media stream for current user, and then set event listeners on socket and peer
 const videoConstraints = { audio: true, video: true };
 navigator.mediaDevices
   .getUserMedia(videoConstraints)
   .then((mediaStream) => {
     addStreamToVideoObject(selfVideo, mediaStream, true);
-    console.log(mediaStream.getAudioTracks[0]);
+    // console.log(mediaStream.getAudioTracks[0]);
     // set the properties of the controls
     initializeControls(mediaStream, selfVideo);
 
@@ -92,11 +95,24 @@ navigator.mediaDevices
 peer.on("open", (id) => {
   console.log("peer open with id ", id);
   socket.emit("addUserToRoom", peer.id, ROOMID);
+  roomUsers[peer.id] = {
+    call: undefined,
+    peerVideo: selfVideo,
+    handRaiseCount: 0,
+  };
 });
 
+// ------------------------ SETTING UP SOCKET HANDLERS ---------------------------
 // upon current user socket init
 socket.on("connect", () => {
   console.log("Socket connected with id: ", socket.id);
+});
+
+socket.on("setTranslation", (translation) => {
+  results.innerHTML += translation.data;
+  translatedResults.innerHTML += translation.translation;
+  results.scrollTop = results.scrollHeight;
+  translatedResults.scrollTop = translatedResults.scrollHeight;
 });
 
 socket.on("raiseHand", (peerID) => {
@@ -139,6 +155,7 @@ socket.on("newChat", (data) => {
   chatContent.scrollTop = chatContent.scrollHeight;
 });
 
+// ------------------------ HAND DETECTION LOGIC ----------------------------------
 const modelParams = {
   flipHorizontal: true, // flip e.g for video
   imageScaleFactor: 0.7, // reduce input image size .
@@ -191,21 +208,13 @@ const handDetectionHandler = () => {
   });
 };
 
+// -------------------------- BUTTON INITS ------------------------------
 const initializeControls = (mediaStream, selfVideo) => {
   // roomLink.innerHTML = ROOMID;
 
   userNumber.innerHTML = totalUsers;
 
   tippyHandler();
-  // copyRoomInfo.addEventListener("click", (e) => {
-  //   let roomInfo = document.querySelector("#roomLink");
-  //   console.log(roomInfo);
-  //   roomInfo.value = `https://engagecloneritvik.herokuapp.com/${ROOMID}`;
-  //   roomInfo.select();
-  //   roomInfo.setSelectionRange(0, 99999);
-  //   document.execCommand("copy");
-  //   console.log(roomInfo.value);
-  // });
   muteButton.addEventListener("click", (e) => {
     toggleAudio(mediaStream, muteButton);
     ohSnap("Toggling mute", { color: "red", duration: "1000" });
@@ -266,11 +275,12 @@ const initializeControls = (mediaStream, selfVideo) => {
     } else {
       captionButton.classList.remove("deselected");
       captionButton.classList.add("selected");
-      stt(captionButton);
+      stt(captionButton, socket);
     }
   });
 };
 
+// ------------------------------ HELPER FUNCTIONS --------------------------------
 // when you want to call a user with their peerID
 const callUserWithPeerID = (toCallPeerID, currentUserStream) => {
   const call = peer.call(toCallPeerID, currentUserStream);

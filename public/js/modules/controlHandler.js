@@ -1,16 +1,3 @@
-export const toggleVideo = (mediaStream, videoButton, selfVideo) => {
-  mediaStream.getVideoTracks()[0].enabled =
-    !mediaStream.getVideoTracks()[0].enabled;
-  if (videoButton.classList.contains("selected")) {
-    videoButton.classList.remove("selected");
-    videoButton.classList.add("deselected");
-  } else {
-    videoButton.classList.remove("deselected");
-    videoButton.classList.add("selected");
-    handTrack.stopVideo(selfVideo);
-  }
-};
-
 export const toggleAudio = (mediaStream, muteButton) => {
   mediaStream.getAudioTracks()[0].enabled =
     !mediaStream.getAudioTracks()[0].enabled;
@@ -28,6 +15,14 @@ export const raiseHandHandler = (vid) => {
     vid.classList.replace("raised", "unraised");
   } else {
     vid.classList.replace("unraised", "raised");
+  }
+};
+
+export const captionsHandler = (vid) => {
+  if (vid.classList.contains("ccon")) {
+    vid.classList.replace("ccon", "ccoff");
+  } else {
+    vid.classList.replace("ccoff", "ccon");
   }
 };
 

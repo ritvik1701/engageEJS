@@ -47,6 +47,10 @@ io.on("connection", (socket) => {
       socket.broadcast.to(roomId).emit("raiseHand", peerID);
     });
 
+    socket.on("gotTranslation", (translation) => {
+      socket.broadcast.to(roomId).emit("setTranslation", translation);
+    });
+
     socket.on("pressedDisconnectButton", (peerid) => {
       console.log("recieved disconnectButton");
       socket.broadcast.to(roomId).emit("leavingCall", peerid);

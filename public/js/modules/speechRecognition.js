@@ -8,7 +8,12 @@ var endpoint = "https://api.cognitive.microsofttranslator.com";
 // This is required if using a Cognitive Services resource.
 var location = "centralindia";
 
-const requestTranslation = (targetLanguage, data, translatedResults) => {
+const requestTranslation = (
+  targetLanguage,
+  data,
+  translatedResults,
+  socket
+) => {
   axios({
     baseURL: endpoint,
     url: "/translate",
@@ -31,15 +36,17 @@ const requestTranslation = (targetLanguage, data, translatedResults) => {
     ],
     responseType: "json",
   }).then(function (response) {
-    translatedResults.innerHTML += response.data[0].translations[0].text;
+    let translation = response.data[0].translations[0].text;
+    translatedResults.innerHTML += translation;
     translatedResults.scrollTop = translatedResults.scrollHeight;
+    socket.emit("gotTranslation", { data, translation });
   });
 };
 
 let results = document.querySelector("#sttResult");
 let translatedResults = document.querySelector("#translatedResult");
 
-export const stt = (captionButton) => {
+export const stt = (captionButton, socket) => {
   recognition.continuous = true;
   recognition.interimResults = false;
 
@@ -47,7 +54,7 @@ export const stt = (captionButton) => {
     console.log(e.results);
     let current = e.resultIndex;
     let transcript = e.results[current][0].transcript;
-    requestTranslation("hi", transcript, translatedResults);
+    requestTranslation("hi", transcript, translatedResults, socket);
     results.innerHTML += transcript;
     results.scrollTop = results.scrollHeight;
     // console.log(e.results[0]);
