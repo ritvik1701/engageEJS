@@ -1,8 +1,8 @@
 #ohsnap {
   position: absolute;
-  top: 82vh;
+  top: 1vh;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, 0%);
 }
 
 .alert {
@@ -11,6 +11,10 @@
   float: right;
   clear: right;
   background-color: white;
+  font-size: 15px;
+  padding: 10px 10px;
+  margin: 5px;
+  text-align: center;
 }
 
 .alert-red {

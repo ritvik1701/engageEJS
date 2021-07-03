@@ -32,12 +32,14 @@ const requestTranslation = (targetLanguage, data, translatedResults) => {
     responseType: "json",
   }).then(function (response) {
     translatedResults.innerHTML += response.data[0].translations[0].text;
+    translatedResults.scrollTop = translatedResults.scrollHeight;
   });
 };
 
+let results = document.querySelector("#sttResult");
+let translatedResults = document.querySelector("#translatedResult");
+
 export const stt = (captionButton) => {
-  let results = document.querySelector("#sttResult");
-  let translatedResults = document.querySelector("#translatedResult");
   recognition.continuous = true;
   recognition.interimResults = false;
 
@@ -45,8 +47,9 @@ export const stt = (captionButton) => {
     console.log(e.results);
     let current = e.resultIndex;
     let transcript = e.results[current][0].transcript;
-    requestTranslation("ko", transcript, translatedResults);
+    requestTranslation("hi", transcript, translatedResults);
     results.innerHTML += transcript;
+    results.scrollTop = results.scrollHeight;
     // console.log(e.results[0]);
   };
 
@@ -74,10 +77,10 @@ export const stt = (captionButton) => {
     console.log("Speech ended");
     captionButton.classList.remove("selected");
     captionButton.classList.add("deselected");
-    ohSnap("Captions disabled due to inactivity", {
-      color: "yellow",
-      duration: "2000",
-    });
+    // ohSnap("Captions disabled due to inactivity", {
+    //   color: "yellow",
+    //   duration: "2000",
+    // });
   };
 
   recognition.start();

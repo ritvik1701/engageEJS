@@ -45,7 +45,7 @@ navigator.mediaDevices
   .getUserMedia(videoConstraints)
   .then((mediaStream) => {
     addStreamToVideoObject(selfVideo, mediaStream, true);
-
+    console.log(mediaStream.getAudioTracks[0]);
     // set the properties of the controls
     initializeControls(mediaStream, selfVideo);
 
@@ -69,6 +69,7 @@ navigator.mediaDevices
       //when the callee disconnects the call
       call.on("close", () => {
         console.log("closing call");
+        videoDivMap[peerVideo].classList.add("d-none");
         videoDivMap[peerVideo].remove();
         totalUsers -= 1;
         userNumber.innerHTML = totalUsers;
