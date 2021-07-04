@@ -1,12 +1,12 @@
-var SpeechRecognition = window.webkitSpeechRecognition;
-var recognition = new SpeechRecognition();
+let SpeechRecognition = window.webkitSpeechRecognition;
+let recognition = new SpeechRecognition();
 
-var subscriptionKey = "ee9df74b45d04754bcc1f35b8aef63b6";
-var endpoint = "https://api.cognitive.microsofttranslator.com";
+let subscriptionKey = process.env.SUBSCRIPTION_KEY;
+let endpoint = "https://api.cognitive.microsofttranslator.com";
 
 // Add your location, also known as region. The default is global.
 // This is required if using a Cognitive Services resource.
-var location = "centralindia";
+let location = process.env.LOCATION;
 
 const requestTranslation = (
   targetLanguage,
@@ -46,7 +46,8 @@ const requestTranslation = (
 let results = document.querySelector("#sttResult");
 let translatedResults = document.querySelector("#translatedResult");
 
-export const stt = (captionButton, socket) => {
+export const stt = (captionButton, socket, lang) => {
+  console.log("In stt");
   recognition.continuous = true;
   recognition.interimResults = false;
 
@@ -54,7 +55,7 @@ export const stt = (captionButton, socket) => {
     console.log(e.results);
     let current = e.resultIndex;
     let transcript = e.results[current][0].transcript;
-    requestTranslation("hi", transcript, translatedResults, socket);
+    requestTranslation(lang, transcript, translatedResults, socket);
     results.innerHTML += transcript;
     results.scrollTop = results.scrollHeight;
     // console.log(e.results[0]);
@@ -77,6 +78,19 @@ export const stt = (captionButton, socket) => {
       });
       captionButton.classList.remove("selected");
       captionButton.classList.add("deselected");
+    } else if (e.error == "network") {
+      ohSnap("Error: Feature currently only on Google Chrome!", {
+        color: "yellow",
+        duration: "3000",
+      });
+      captionButton.classList.remove("selected");
+      captionButton.classList.add("deselected");
+      sttStop();
+    } else {
+      ohSnap("Error while starting Live Captions", {
+        color: "yellow",
+        duration: "3000",
+      });
     }
   };
 
@@ -95,7 +109,7 @@ export const stt = (captionButton, socket) => {
 
 export const sttStop = () => {
   ohSnap("Live captions stopped", {
-    color: "green",
+    color: "red",
     duration: "2000",
   });
   recognition.stop();

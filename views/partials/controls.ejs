@@ -6,13 +6,6 @@
     </div>
   </div>
   <div class="controls">
-    <!-- <div class="roomDetails"> -->
-    <!-- <button id="copyRoom">
-        <span class="heading">Invite</span>
-        <i class="fas fa-user-plus fa-md mr-2"></i>
-      </button> -->
-    <!-- <span id="roomLink"></span> -->
-    <!-- </div> -->
     <button class="deselected" id="muteButton">
       <i class="fas fa-microphone-slash fa-lg"></i>
     </button>
@@ -36,5 +29,18 @@
     <button class="deselected" id="captionButton">
       <i class="fas fa-closed-captioning fa-lg"></i>
     </button>
+    <div class="d-none" id="languageSelector">
+      <select name="languages" id="languages" class="d-block" required>
+        <option value="ko">Korean</option>
+        <option value="ja">Janapnese</option>
+        <option value="es">Spanish</option>
+        <option value="hi">Hindi</option>
+        <option value="ur">Urdu</option>
+        <option value="gu">Gujrati</option>
+      </select>
+      <div class="d-flex justify-content-center">
+        <button class="deselected" id="languageSubmit">Translate</button>
+      </div>
+    </div>
   </div>
 </div>

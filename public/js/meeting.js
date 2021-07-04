@@ -6,7 +6,7 @@ import {
 } from "./modules/controlHandler.js";
 
 const peer = new Peer(undefined, {
-  host: "peerjsritvik.herokuapp.com",
+  host: process.env.PEER_HOST,
   secure: true,
   port: 443,
   path: "/",
@@ -30,6 +30,9 @@ const captionButton = document.querySelector("#captionButton");
 const screenshareButton = document.querySelector("#screenshareButton");
 const results = document.querySelector("#sttResult");
 const translatedResults = document.querySelector("#translatedResult");
+const languagesDropdown = document.querySelector("#languages");
+const languageSelector = document.querySelector("#languageSelector");
+const translateButton = document.querySelector("#languageSubmit");
 
 const selfVideo = document.createElement("video");
 selfVideo.setAttribute("poster", "assets/userIcon.png");
@@ -40,6 +43,7 @@ let videoDivMap = {};
 let totalUsers = 1;
 let enableDetection = false;
 let handNotif = new Audio("../assets/handRaise.mp3");
+let camVideo = undefined;
 
 // ---------------------- STARTING THE CALL ------------------------
 // get the media stream for current user, and then set event listeners on socket and peer
@@ -83,6 +87,24 @@ navigator.mediaDevices
     socket.on("newConnection", (incomingUserId) => {
       console.log("User with PeerID " + incomingUserId + " joined the room");
       callUserWithPeerID(incomingUserId, mediaStream);
+    });
+
+    screenshareButton.addEventListener("click", (e) => {
+      console.log("Screenshare clicked");
+      if (screenshareButton.classList.contains("selected")) {
+        mediaStream.removeTrack(mediaStream.getVideoTracks()[0]);
+        mediaStream.addTrack(camVideo);
+        screenshareButton.classList.remove("selected");
+        screenshareButton.classList.add("deselected");
+      } else {
+        navigator.mediaDevices.getDisplayMedia().then((displayMediaStream) => {
+          camVideo = mediaStream.getVideoTracks()[0];
+          mediaStream.removeTrack(mediaStream.getVideoTracks()[0]);
+          mediaStream.addTrack(displayMediaStream.getVideoTracks()[0]);
+        });
+        screenshareButton.classList.remove("deselected");
+        screenshareButton.classList.add("selected");
+      }
     });
   })
   //when getting user media fails, or any of the above listeners fail
@@ -252,30 +274,51 @@ const initializeControls = (mediaStream, selfVideo) => {
     selfRaiseHand();
   });
   gestureButton.addEventListener("click", (e) => {
-    // ohSnap("Toggling gestures", { color: "red", duration: "1000" });
-    console.log("Toggling gestures");
-    if (gestureButton.classList.contains("selected")) {
-      gestureButton.classList.remove("selected");
-      gestureButton.classList.add("deselected");
-      enableDetection = false;
-      ohSnap("Disabling gestures", { color: "red", duration: "1000" });
+    if (videoButton.classList.contains("selected")) {
+      ohSnap("Enable video to start gesture recognition", {
+        color: "yellow",
+        duration: "2000",
+      });
     } else {
-      gestureButton.classList.remove("deselected");
-      gestureButton.classList.add("selected");
-      enableDetection = true;
-      handDetectionHandler();
+      console.log("Toggling gestures");
+      if (gestureButton.classList.contains("selected")) {
+        gestureButton.classList.remove("selected");
+        gestureButton.classList.add("deselected");
+        enableDetection = false;
+        ohSnap("Disabling gestures", { color: "red", duration: "1000" });
+      } else {
+        gestureButton.classList.remove("deselected");
+        gestureButton.classList.add("selected");
+        enableDetection = true;
+        handDetectionHandler();
+      }
     }
   });
   captionButton.addEventListener("click", (e) => {
+    let lang = "ko";
+    translateButton.addEventListener("click", (e) => {
+      if (captionButton.classList.contains("deselected")) {
+        lang = languagesDropdown.value;
+        captionButton.classList.remove("deselected");
+        captionButton.classList.add("selected");
+        languageSelector.classList.replace("d-block", "d-none");
+        stt(captionButton, socket, lang);
+      }
+    });
     console.log("Toggling captions");
-    if (captionButton.classList.contains("selected")) {
-      captionButton.classList.remove("selected");
-      captionButton.classList.add("deselected");
-      sttStop();
+    if (muteButton.classList.contains("selected")) {
+      ohSnap("Unmute to continue with captions", {
+        color: "yellow",
+        duration: "2000",
+      });
     } else {
-      captionButton.classList.remove("deselected");
-      captionButton.classList.add("selected");
-      stt(captionButton, socket);
+      if (captionButton.classList.contains("selected")) {
+        captionButton.classList.remove("selected");
+        captionButton.classList.add("deselected");
+        sttStop();
+      } else {
+        languageSelector.classList.replace("d-none", "d-block");
+      }
     }
   });
 };

@@ -37,3 +37,34 @@
   border: 2px solid #9708cc !important;
   background-color: #45055c !important;
 }
+
+#languageSelector {
+  /* display: flex; */
+  padding: 15px;
+  border-radius: 10px;
+  /* align-items: center; */
+  background-color: #28242c;
+  position: absolute;
+  bottom: 90px;
+  right: -30px;
+}
+
+#languages {
+  color: white;
+  width: fit-content;
+  border: 2px solid #9708cc !important;
+  background-color: #45055c !important;
+  height: fit-content;
+}
+
+#languageSubmit {
+  color: white;
+  border-radius: 10px;
+  padding: 5px 10px;
+  width: fit-content;
+  border: 2px solid #9708cc !important;
+  background-color: #45055c !important;
+  margin: 0px;
+  margin-top: 15px;
+  /* margin-left: 10px; */
+}
