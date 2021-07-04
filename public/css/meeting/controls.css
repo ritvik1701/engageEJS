@@ -14,8 +14,8 @@
 
 .controls {
   background-color: #111111;
-  padding: 5px;
-  margin: 5px;
+  padding: 4px;
+  margin: 4px;
   border-radius: 40px;
 }
 
@@ -24,9 +24,9 @@
   height: 50px;
   border-radius: 50%;
   border: 0px;
-  margin: 5px;
+  margin: 3px;
   color: white;
-  background-color: #9708cc;
+  background-color: #9ea1ff;
 }
 
 .selected {
@@ -34,8 +34,8 @@
 }
 
 .deselected {
-  border: 2px solid #9708cc !important;
-  background-color: #45055c !important;
+  border: 2px solid #9ea1ff !important;
+  background-color: #9ea1ff55 !important;
 }
 
 #languageSelector {
@@ -52,8 +52,8 @@
 #languages {
   color: white;
   width: fit-content;
-  border: 2px solid #9708cc !important;
-  background-color: #45055c !important;
+  border: 2px solid #9ea1ff !important;
+  background-color: #9ea1ff55 !important;
   height: fit-content;
 }
 
@@ -62,8 +62,8 @@
   border-radius: 10px;
   padding: 5px 10px;
   width: fit-content;
-  border: 2px solid #9708cc !important;
-  background-color: #45055c !important;
+  border: 2px solid #9ea1ff !important;
+  background-color: #9ea1ff55 !important;
   margin: 0px;
   margin-top: 15px;
   /* margin-left: 10px; */

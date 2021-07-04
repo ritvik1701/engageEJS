@@ -6,7 +6,7 @@ import {
 } from "./modules/controlHandler.js";
 
 const peer = new Peer(undefined, {
-  host: process.env.PEER_HOST,
+  host: "peerjsritvik.herokuapp.com",
   secure: true,
   port: 443,
   path: "/",
@@ -32,11 +32,17 @@ const results = document.querySelector("#sttResult");
 const translatedResults = document.querySelector("#translatedResult");
 const languagesDropdown = document.querySelector("#languages");
 const languageSelector = document.querySelector("#languageSelector");
-const translateButton = document.querySelector("#languageSubmit");
+const languageSubmit = document.querySelector("#languageSubmit");
+const translateButton = document.querySelector("#translateButton");
+const liveCaptionHeading = document.querySelector("#liveCaptionHeading");
 
 const selfVideo = document.createElement("video");
 selfVideo.setAttribute("poster", "assets/userIcon.png");
 selfVideo.muted = true;
+
+results.classList.replace("d-block", "d-none");
+liveCaptionHeading.classList.replace("d-block", "d-none");
+translatedResults.classList.replace("d-block", "d-none");
 
 let roomUsers = {};
 let videoDivMap = {};
@@ -44,6 +50,7 @@ let totalUsers = 1;
 let enableDetection = false;
 let handNotif = new Audio("../assets/handRaise.mp3");
 let camVideo = undefined;
+let isCaptionEnabled = false;
 
 // ---------------------- STARTING THE CALL ------------------------
 // get the media stream for current user, and then set event listeners on socket and peer
@@ -130,11 +137,12 @@ socket.on("connect", () => {
   console.log("Socket connected with id: ", socket.id);
 });
 
-socket.on("setTranslation", (translation) => {
-  results.innerHTML += translation.data;
-  translatedResults.innerHTML += translation.translation;
+socket.on("setLiveCaption", (caption) => {
+  console.log("Got result from stt");
+  results.innerHTML += caption.data;
+  // translatedResults.innerHTML += translation.translation;
   results.scrollTop = results.scrollHeight;
-  translatedResults.scrollTop = translatedResults.scrollHeight;
+  // translatedResults.scrollTop = translatedResults.scrollHeight;
 });
 
 socket.on("raiseHand", (peerID) => {
@@ -142,6 +150,24 @@ socket.on("raiseHand", (peerID) => {
   raiseHandHandler(roomUsers[peerID].peerVideo);
   roomUsers[peerID].handRaiseCount += 1;
   if (roomUsers[peerID].handRaiseCount % 2 != 0) handNotif.play();
+});
+
+socket.on("setLiveCaptionUser", (peerID) => {
+  console.log("Setting peer " + peerID + " as live caption");
+  roomUsers[peerID].peerVideo.classList.add("ccon");
+  isCaptionEnabled = true;
+  results.classList.replace("d-none", "d-block");
+  liveCaptionHeading.classList.replace("d-none", "d-block");
+  captionButton.classList.add("d-none");
+});
+
+socket.on("unsetLiveCaptionUser", (peerID) => {
+  roomUsers[peerID].peerVideo.classList.remove("ccon");
+  isCaptionEnabled = false;
+  results.classList.replace("d-block", "d-none");
+  liveCaptionHeading.classList.replace("d-block", "d-none");
+  results.innerHTML = "";
+  captionButton.classList.remove("d-none");
 });
 
 // when a peer leaves the call
@@ -189,6 +215,7 @@ const modelParams = {
 let model;
 let detectionStopped = false;
 let handRaised = false;
+let detectionCount = 0;
 
 const handDetectionHandler = () => {
   if (enableDetection)
@@ -199,15 +226,11 @@ const handDetectionHandler = () => {
   handTrack.startVideo(selfVideo).then((status) => {
     if (status) {
       console.log("detection starting");
-      if (enableDetection)
-        ohSnap("Gestures enabled!", {
-          color: "green",
-          duration: "1500",
-        });
       let interval = setInterval(() => {
         if (detectionStopped || !enableDetection) {
           console.log("clearing interval of detection");
           clearInterval(interval);
+          detectionCount = 0;
         } else {
           startDetection();
         }
@@ -216,6 +239,12 @@ const handDetectionHandler = () => {
   });
   const startDetection = () => {
     model.detect(selfVideo).then((predictions) => {
+      detectionCount += 1;
+      if (enableDetection && detectionCount == 1)
+        ohSnap("Gestures enabled!", {
+          color: "green",
+          duration: "1500",
+        });
       console.log(predictions);
       predictions.forEach((prediction) => {
         if (prediction.label === "open" && !handRaised) {
@@ -295,30 +324,32 @@ const initializeControls = (mediaStream, selfVideo) => {
     }
   });
   captionButton.addEventListener("click", (e) => {
-    let lang = "ko";
-    translateButton.addEventListener("click", (e) => {
-      if (captionButton.classList.contains("deselected")) {
-        lang = languagesDropdown.value;
+    console.log("Toggling captions");
+    if (captionButton.classList.contains("deselected")) {
+      if (isCaptionEnabled) {
+        ohSnap("Live captions in use by another member", {
+          color: "yellow",
+          duration: "2000",
+        });
+      } else if (muteButton.classList.contains("selected")) {
+        ohSnap("Unmute to continue with captions", {
+          color: "yellow",
+          duration: "2000",
+        });
+      } else {
         captionButton.classList.remove("deselected");
         captionButton.classList.add("selected");
-        languageSelector.classList.replace("d-block", "d-none");
-        stt(captionButton, socket, lang);
+        liveCaptionHeading.classList.replace("d-none", "d-block");
+        results.classList.replace("d-none", "d-block");
+        stt(captionButton, socket, peer);
       }
-    });
-    console.log("Toggling captions");
-    if (muteButton.classList.contains("selected")) {
-      ohSnap("Unmute to continue with captions", {
-        color: "yellow",
-        duration: "2000",
-      });
     } else {
-      if (captionButton.classList.contains("selected")) {
-        captionButton.classList.remove("selected");
-        captionButton.classList.add("deselected");
-        sttStop();
-      } else {
-        languageSelector.classList.replace("d-none", "d-block");
-      }
+      captionButton.classList.remove("selected");
+      captionButton.classList.add("deselected");
+      liveCaptionHeading.classList.replace("d-block", "d-none");
+      results.classList.replace("d-block", "d-none");
+      results.innerHTML = "";
+      sttStop(socket, peer);
     }
   });
 };

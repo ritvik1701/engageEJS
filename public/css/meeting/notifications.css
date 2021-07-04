@@ -20,15 +20,15 @@
 
 .alert-red {
   color: white;
-  background-color: #9808cc65;
+  background-color: #484b92;
   border-radius: 5px;
-  border: 3px solid #9708cc;
+  border: 3px solid #9ea2ff;
   color: white;
   border-radius: 40px;
 }
 .alert-green {
   color: white;
-  background-color: #37bc9b71;
+  background-color: #296959;
   border-radius: 5px;
   border: 3px solid #37bc9b;
   color: white;
@@ -40,7 +40,7 @@
 }
 .alert-yellow {
   color: white;
-  background-color: #f6ba4281;
+  background-color: #6e5420;
   border-radius: 5px;
   border: 3px solid #f6bb42;
   color: white;

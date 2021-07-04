@@ -15,6 +15,8 @@ const io = require("socket.io")(server, {
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
 
+let liveCaptionUser = undefined;
+
 // when at root, give a new random roomID
 app.get("/", (req, res) => {
   const roomid = v4();
@@ -47,8 +49,18 @@ io.on("connection", (socket) => {
       socket.broadcast.to(roomId).emit("raiseHand", peerID);
     });
 
-    socket.on("gotTranslation", (translation) => {
-      socket.broadcast.to(roomId).emit("setTranslation", translation);
+    socket.on("gotLiveCaption", (caption) => {
+      socket.broadcast.to(roomId).emit("setLiveCaption", caption);
+    });
+
+    socket.on("liveCaptionUser", (peerID) => {
+      liveCaptionUser = peerID;
+      socket.broadcast.to(roomId).emit("setLiveCaptionUser", peerID);
+    });
+
+    socket.on("liveCaptionUserOff", (peerID) => {
+      liveCaptionUser = undefined;
+      socket.broadcast.to(roomId).emit("unsetLiveCaptionUser", peerID);
     });
 
     socket.on("pressedDisconnectButton", (peerid) => {
