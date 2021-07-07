@@ -46,7 +46,13 @@ export const requestTranslation = (
 let results = document.querySelector("#sttResult");
 let translatedResults = document.querySelector("#translatedResult");
 
-export const stt = (captionButton, socket, peer) => {
+export const stt = (
+  captionButton,
+  socket,
+  peer,
+  results,
+  liveCaptionHeading
+) => {
   console.log("In stt");
   recognition.continuous = true;
   recognition.interimResults = false;
@@ -92,6 +98,9 @@ export const stt = (captionButton, socket, peer) => {
     }
     captionButton.classList.remove("selected");
     captionButton.classList.add("deselected");
+    results.innerHTML = "";
+    results.classList.replace("d-block", "d-none");
+    liveCaptionHeading.classList.replace("d-block", "d-none");
     socket.emit("liveCaptionUserOff", peer.id);
   };
 
@@ -99,10 +108,10 @@ export const stt = (captionButton, socket, peer) => {
     console.log("Speech ended");
     captionButton.classList.remove("selected");
     captionButton.classList.add("deselected");
-    // ohSnap("Captions disabled due to inactivity", {
-    //   color: "yellow",
-    //   duration: "2000",
-    // });
+    results.innerHTML = "";
+    results.classList.replace("d-block", "d-none");
+    liveCaptionHeading.classList.replace("d-block", "d-none");
+    socket.emit("liveCaptionUserOff", peer.id);
   };
 
   recognition.start();

@@ -12,7 +12,11 @@ const peer = new Peer(undefined, {
   path: "/",
 });
 
-import { stt, sttStop } from "./modules/speechRecognition.js";
+import {
+  requestTranslation,
+  stt,
+  sttStop,
+} from "./modules/speechRecognition.js";
 
 // get all the elements that need modification
 const socket = io.connect("/");
@@ -33,7 +37,7 @@ const translatedResults = document.querySelector("#translatedResult");
 const languagesDropdown = document.querySelector("#languages");
 const languageSelector = document.querySelector("#languageSelector");
 const languageSubmit = document.querySelector("#languageSubmit");
-const translateButton = document.querySelector("#translateButton");
+const translateButton = document.querySelector("#translateButton ");
 const liveCaptionHeading = document.querySelector("#liveCaptionHeading");
 
 const selfVideo = document.createElement("video");
@@ -50,7 +54,10 @@ let totalUsers = 1;
 let enableDetection = false;
 let handNotif = new Audio("../assets/handRaise.mp3");
 let camVideo = undefined;
+let screenVideo = undefined;
 let isCaptionEnabled = false;
+let isTranslateEnabled = false;
+let lang = "ko";
 
 // ---------------------- STARTING THE CALL ------------------------
 // get the media stream for current user, and then set event listeners on socket and peer
@@ -61,6 +68,7 @@ navigator.mediaDevices
     addStreamToVideoObject(selfVideo, mediaStream, true);
     // console.log(mediaStream.getAudioTracks[0]);
     // set the properties of the controls
+    camVideo = mediaStream.getVideoTracks()[0];
     initializeControls(mediaStream, selfVideo);
 
     // when there is incoming call
@@ -99,16 +107,43 @@ navigator.mediaDevices
     screenshareButton.addEventListener("click", (e) => {
       console.log("Screenshare clicked");
       if (screenshareButton.classList.contains("selected")) {
+        screenVideo.getVideoTracks().forEach((track) => {
+          track.stop();
+        });
+        Object.keys(roomUsers).forEach((user) => {
+          if (roomUsers[user].call) {
+            roomUsers[user].call.peerConnection
+              .getSenders()[1]
+              .replaceTrack(camVideo);
+            console.log("Replacing video source");
+          }
+        });
         mediaStream.removeTrack(mediaStream.getVideoTracks()[0]);
         mediaStream.addTrack(camVideo);
         screenshareButton.classList.remove("selected");
         screenshareButton.classList.add("deselected");
       } else {
-        navigator.mediaDevices.getDisplayMedia().then((displayMediaStream) => {
-          camVideo = mediaStream.getVideoTracks()[0];
-          mediaStream.removeTrack(mediaStream.getVideoTracks()[0]);
-          mediaStream.addTrack(displayMediaStream.getVideoTracks()[0]);
-        });
+        navigator.mediaDevices
+          .getDisplayMedia()
+          .then((displayMediaStream) => {
+            screenVideo = displayMediaStream;
+            mediaStream.removeTrack(camVideo);
+            mediaStream.addTrack(displayMediaStream.getVideoTracks()[0]);
+            Object.keys(roomUsers).forEach((user) => {
+              if (roomUsers[user].call) {
+                roomUsers[user].call.peerConnection
+                  .getSenders()[1]
+                  .replaceTrack(displayMediaStream.getVideoTracks()[0])
+                  .catch((e) => {
+                    console.log("lmao ", e);
+                  });
+                console.log("Replacing video source");
+              }
+            });
+          })
+          .catch((e) => {
+            console.log("Screenshare error, ", e);
+          });
         screenshareButton.classList.remove("deselected");
         screenshareButton.classList.add("selected");
       }
@@ -140,8 +175,11 @@ socket.on("connect", () => {
 socket.on("setLiveCaption", (caption) => {
   console.log("Got result from stt");
   results.innerHTML += caption.data;
-  // translatedResults.innerHTML += translation.translation;
   results.scrollTop = results.scrollHeight;
+  if (isTranslateEnabled) {
+    requestTranslation(lang, caption.data, translatedResults, socket);
+  }
+  // translatedResults.innerHTML += translation.translation;
   // translatedResults.scrollTop = translatedResults.scrollHeight;
 });
 
@@ -159,6 +197,7 @@ socket.on("setLiveCaptionUser", (peerID) => {
   results.classList.replace("d-none", "d-block");
   liveCaptionHeading.classList.replace("d-none", "d-block");
   captionButton.classList.add("d-none");
+  translateButton.classList.remove("d-none");
 });
 
 socket.on("unsetLiveCaptionUser", (peerID) => {
@@ -168,6 +207,15 @@ socket.on("unsetLiveCaptionUser", (peerID) => {
   liveCaptionHeading.classList.replace("d-block", "d-none");
   results.innerHTML = "";
   captionButton.classList.remove("d-none");
+  translateButton.classList.add("d-none");
+  languageSelector.classList.add("d-none");
+  if (!translatedResults.classList.contains("d-none")) {
+    translatedResults.classList.add("d-none");
+    translatedResults.innerHTML = "";
+  }
+  if (translateButton.classList.contains("selected")) {
+    translateButton.classList.replace("selected", "deselected");
+  }
 });
 
 // when a peer leaves the call
@@ -183,7 +231,7 @@ socket.on("leavingCall", (userPeerID) => {
 
 // when the socket gets a new chat
 socket.on("newChat", (data) => {
-  const content = data.message;
+  const content = data.content;
   const user = data.username;
   const system = data.system;
   const message = document.createElement("div");
@@ -294,7 +342,13 @@ const initializeControls = (mediaStream, selfVideo) => {
     const message = chatInput.value;
     if (message !== "") {
       const username = USERNAME;
-      socket.emit("data", { username, message, system: false });
+      socket.emit("data", {
+        roomID: `${ROOMID}`,
+        userID: peer.id,
+        username: username,
+        content: message,
+        system: false,
+      });
       chatInput.value = "";
     }
   });
@@ -341,7 +395,7 @@ const initializeControls = (mediaStream, selfVideo) => {
         captionButton.classList.add("selected");
         liveCaptionHeading.classList.replace("d-none", "d-block");
         results.classList.replace("d-none", "d-block");
-        stt(captionButton, socket, peer);
+        stt(captionButton, socket, peer, results, liveCaptionHeading);
       }
     } else {
       captionButton.classList.remove("selected");
@@ -351,6 +405,26 @@ const initializeControls = (mediaStream, selfVideo) => {
       results.innerHTML = "";
       sttStop(socket, peer);
     }
+  });
+
+  translateButton.addEventListener("click", (e) => {
+    console.log("translate button clicked");
+    if (translateButton.classList.contains("deselected")) {
+      languageSelector.classList.remove("d-none");
+      translateButton.classList.replace("deselected", "selected");
+    } else {
+      if (!languageSelector.classList.contains("d-none"))
+        languageSelector.classList.add("d-none");
+      translateButton.classList.replace("selected", "deselected");
+      isTranslateEnabled = false;
+    }
+  });
+
+  languageSubmit.addEventListener("click", (e) => {
+    lang = languagesDropdown.value;
+    isTranslateEnabled = true;
+    translatedResults.classList.remove("d-none");
+    languageSelector.classList.add("d-none");
   });
 };
 
@@ -414,8 +488,10 @@ const selfRaiseHand = () => {
   } else {
     selfVideo.classList.replace("unraised", "raised");
     socket.emit("data", {
-      username: "SYSTEM",
-      message: `${USERNAME} raised hand`,
+      roomID: `${ROOMID}`,
+      userID: "System",
+      username: "System",
+      content: `${USERNAME} raised hand`,
       system: true,
     });
     handRaised = true;

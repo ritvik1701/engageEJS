@@ -1,4 +1,4 @@
-// require("dotenv").config();
+require("dotenv").config();
 
 const path = require("path");
 const express = require("express");
@@ -16,6 +16,15 @@ app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
 
 let liveCaptionUser = undefined;
+const mongoose = require("mongoose");
+const mongoDB = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@engageclone.4marc.mongodb.net/message-database?retryWrites=true&w=majority`;
+mongoose
+  .connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {
+    console.log("Connected to db");
+  });
+
+const Message = require("./models/messages");
 
 // when at root, give a new random roomID
 app.get("/", (req, res) => {
@@ -31,13 +40,29 @@ app.get("/:roomID", (req, res) => {
 
 io.on("connection", (socket) => {
   console.log("New socket connection: " + socket.id);
-  socket.on("data", (data) => {
-    io.emit("newChat", data);
-  });
 
   socket.on("addUserToRoom", (userPeerID, roomId) => {
     socket.join(roomId);
     socket.broadcast.to(roomId).emit("newConnection", userPeerID);
+
+    socket.on("data", (data) => {
+      const chat = new Message({
+        roomID: data.roomID,
+        userID: data.userID,
+        username: data.username,
+        content: data.content,
+        system: data.system,
+      });
+      console.log("data recieved: ", data.username);
+      chat
+        .save()
+        .then(() => {
+          io.emit("newChat", data);
+        })
+        .catch((e) => {
+          console.log("error while saving to db!", e);
+        });
+    });
 
     socket.on("disconnect", () => {
       console.log("user left");
