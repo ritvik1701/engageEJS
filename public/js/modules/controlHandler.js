@@ -29,7 +29,7 @@ export const captionsHandler = (vid) => {
 export const disconnectCall = (socket, peer) => {
   socket.emit("pressedDisconnectButton", peer.id);
   console.log("emitted disconnectButton event");
-  window.location.replace("/");
+  window.location.replace(`/${ROOMID}`);
 };
 
 export const tippyHandler = () => {

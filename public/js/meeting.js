@@ -158,7 +158,7 @@ navigator.mediaDevices
 // upon current user peerID init
 peer.on("open", (id) => {
   console.log("peer open with id ", id);
-  socket.emit("addUserToRoom", peer.id, ROOMID);
+  socket.emit("addUserToRoom", peer.id, ROOMID, socket.id);
   roomUsers[peer.id] = {
     call: undefined,
     peerVideo: selfVideo,
@@ -170,6 +170,12 @@ peer.on("open", (id) => {
 // upon current user socket init
 socket.on("connect", () => {
   console.log("Socket connected with id: ", socket.id);
+});
+
+socket.on("chatHistory", (messages) => {
+  messages.forEach((message) => {
+    addChatMessage(message);
+  });
 });
 
 socket.on("setLiveCaption", (caption) => {
@@ -231,24 +237,7 @@ socket.on("leavingCall", (userPeerID) => {
 
 // when the socket gets a new chat
 socket.on("newChat", (data) => {
-  const content = data.content;
-  const user = data.username;
-  const system = data.system;
-  const message = document.createElement("div");
-  message.classList.add("message");
-  const para = document.createElement("p");
-  para.innerHTML = content;
-  if (!system) {
-    const header = document.createElement("h5");
-    header.innerHTML = user;
-    message.appendChild(header);
-  } else {
-    message.classList.add("system");
-  }
-  message.appendChild(para);
-
-  chatContent.appendChild(message);
-  chatContent.scrollTop = chatContent.scrollHeight;
+  addChatMessage(data);
 });
 
 // ------------------------ HAND DETECTION LOGIC ----------------------------------
@@ -348,6 +337,7 @@ const initializeControls = (mediaStream, selfVideo) => {
         username: username,
         content: message,
         system: false,
+        inMeeting: true,
       });
       chatInput.value = "";
     }
@@ -493,6 +483,7 @@ const selfRaiseHand = () => {
       username: "System",
       content: `${USERNAME} raised hand`,
       system: true,
+      inMeeting: true,
     });
     handRaised = true;
   }
@@ -503,4 +494,32 @@ const selfRaiseHand = () => {
     handButton.classList.remove("deselected");
     handButton.classList.add("selected");
   }
+};
+
+const addChatMessage = (data) => {
+  const content = data.content;
+  const user = data.username;
+  const system = data.system;
+  const inMeeting = data.inMeeting;
+  const message = document.createElement("div");
+  message.classList.add("message");
+  const para = document.createElement("p");
+  para.innerHTML = content;
+  if (!system) {
+    const header = document.createElement("h5");
+    header.innerHTML = user;
+    message.appendChild(header);
+  } else {
+    message.classList.add("system");
+  }
+
+  if (!inMeeting) {
+    para.innerHTML = "OUTSIDE MEETING " + para.innerHTML;
+  } else {
+    para.innerHTML = "IN MEETING " + para.innerHTML;
+  }
+  message.appendChild(para);
+
+  chatContent.appendChild(message);
+  chatContent.scrollTop = chatContent.scrollHeight;
 };

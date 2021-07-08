@@ -20,6 +20,10 @@ const messageSchema = new mongoose.Schema({
     type: Boolean,
     required: true,
   },
+  inMeeting: {
+    type: Boolean,
+    required: true,
+  },
 });
 
 const Message = mongoose.model("message", messageSchema);
