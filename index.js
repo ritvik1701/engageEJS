@@ -17,7 +17,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 let liveCaptionUser = undefined;
 const mongoose = require("mongoose");
-const mongoDB = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@engageclone.4marc.mongodb.net/message-database?retryWrites=true&w=majority`;
+const mongoDB = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.4marc.mongodb.net/message-database?retryWrites=true&w=majority`;
 mongoose
   .connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
@@ -36,6 +36,10 @@ app.get("/", (req, res) => {
 
 app.get("/:roomID", (req, res) => {
   res.render("room", { roomId: req.params.roomID });
+});
+
+app.get("/meet/:roomID", (req, res) => {
+  res.render("meeting", { roomId: req.params.roomID });
 });
 
 io.on("connection", (socket) => {
