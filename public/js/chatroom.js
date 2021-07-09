@@ -1,3 +1,5 @@
+import { addChatMessage } from "./modules/addChatHandler.js";
+
 const joinRoom = document.querySelector("#joinRoom");
 const leaveRoom = document.querySelector("#leaveRoom");
 const chatInput = document.querySelector("#chatInput");
@@ -18,17 +20,17 @@ socket.on("newChatroomConnection", (userSocket) => {
 socket.on("chatHistory", (messages) => {
   console.log(messages);
   messages.forEach((message) => {
-    addChatMessage(message);
+    addChatMessage(message, chatContent, true);
   });
 });
 
 socket.on("newChat", (data) => {
-  addChatMessage(data);
+  addChatMessage(data, chatContent, true);
 });
 
 joinRoom.addEventListener("click", (e) => {
   console.log("clicked");
-  window.location.replace(`meet/${ROOMID}`);
+  window.location.replace(`meet/${ROOMID}?username=${USERNAME}`);
 });
 
 leaveRoom.addEventListener("click", (e) => {
@@ -51,31 +53,3 @@ sendButton.addEventListener("click", (e) => {
     chatInput.value = "";
   }
 });
-
-const addChatMessage = (data) => {
-  const content = data.content;
-  const user = data.username;
-  const system = data.system;
-  const inMeeting = data.inMeeting;
-  const message = document.createElement("div");
-  message.classList.add("message");
-  const para = document.createElement("p");
-  para.innerHTML = content;
-  if (!system) {
-    const header = document.createElement("h5");
-    header.innerHTML = user;
-    message.appendChild(header);
-  } else {
-    message.classList.add("system");
-  }
-
-  if (!inMeeting) {
-    para.innerHTML = "OUTSIDE MEETING " + para.innerHTML;
-  } else {
-    para.innerHTML = "IN MEETING " + para.innerHTML;
-  }
-  message.appendChild(para);
-
-  chatContent.appendChild(message);
-  chatContent.scrollTop = chatContent.scrollHeight;
-};

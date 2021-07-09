@@ -18,6 +18,8 @@ import {
   sttStop,
 } from "./modules/speechRecognition.js";
 
+import { addChatMessage } from "./modules/addChatHandler.js";
+
 // get all the elements that need modification
 const socket = io.connect("/");
 const videos = document.querySelector("#video-grid");
@@ -174,7 +176,7 @@ socket.on("connect", () => {
 
 socket.on("chatHistory", (messages) => {
   messages.forEach((message) => {
-    addChatMessage(message);
+    addChatMessage(message, chatContent);
   });
 });
 
@@ -237,7 +239,7 @@ socket.on("leavingCall", (userPeerID) => {
 
 // when the socket gets a new chat
 socket.on("newChat", (data) => {
-  addChatMessage(data);
+  addChatMessage(data, chatContent);
 });
 
 // ------------------------ HAND DETECTION LOGIC ----------------------------------
@@ -494,32 +496,4 @@ const selfRaiseHand = () => {
     handButton.classList.remove("deselected");
     handButton.classList.add("selected");
   }
-};
-
-const addChatMessage = (data) => {
-  const content = data.content;
-  const user = data.username;
-  const system = data.system;
-  const inMeeting = data.inMeeting;
-  const message = document.createElement("div");
-  message.classList.add("message");
-  const para = document.createElement("p");
-  para.innerHTML = content;
-  if (!system) {
-    const header = document.createElement("h5");
-    header.innerHTML = user;
-    message.appendChild(header);
-  } else {
-    message.classList.add("system");
-  }
-
-  if (!inMeeting) {
-    para.innerHTML = "OUTSIDE MEETING " + para.innerHTML;
-  } else {
-    para.innerHTML = "IN MEETING " + para.innerHTML;
-  }
-  message.appendChild(para);
-
-  chatContent.appendChild(message);
-  chatContent.scrollTop = chatContent.scrollHeight;
 };

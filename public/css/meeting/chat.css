@@ -14,13 +14,33 @@
 
 .message {
   padding: 10px;
-  margin: 0 15px;
   background-color: #1b1b1b;
   color: white;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
-  border-left: 5px solid #9708cc;
+  border-left: 5px solid #9ea1ff;
   margin-bottom: 10px;
+  width: max-content;
+}
+
+.selfMessage {
+  border: none;
+  border-right: 5px solid #9ea1ff;
+  background-color: #323348;
+  margin-left: auto;
+}
+
+.system {
+  width: 100%;
+  margin-right: 15px;
+}
+
+.selfMessage h5 {
+  text-align: right;
+}
+
+.selfMessage p {
+  text-align: right;
 }
 
 .caption {
@@ -47,7 +67,7 @@
 
 .system {
   border-left: 5px solid #f6bb42;
-  background-color: #f6ba423d;
+  background-color: #f6ba4221;
 }
 
 .message h5 {
@@ -77,12 +97,12 @@
   min-height: 10vh;
   width: 100%;
   overflow: auto;
+  padding: 0px 15px;
   /* background-color: rebeccapurple; */
 }
 
-/* width */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 5px;
 }
 
 /* Track */
@@ -93,11 +113,18 @@
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #9708cc;
+  background: #6567a1;
   border-radius: 10px;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #b635e6;
+  background: #6567a1;
+}
+
+.status {
+  opacity: 0.5;
+  font-style: italic;
+  font-size: 15px;
+  font-weight: 400;
 }

@@ -34,11 +34,18 @@ app.get("/", (req, res) => {
 });
 
 app.get("/:roomID", (req, res) => {
-  res.render("room", { roomId: req.params.roomID });
+  res.render("room", {
+    roomId: req.params.roomID,
+    username: req.query.username,
+  });
+  console.log(req.query);
 });
 
 app.get("/meet/:roomID", (req, res) => {
-  res.render("meeting", { roomId: req.params.roomID });
+  res.render("meeting", {
+    roomId: req.params.roomID,
+    username: req.query.username,
+  });
 });
 
 io.on("connection", (socket) => {

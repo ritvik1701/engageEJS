@@ -8,36 +8,34 @@
     <%- include('partials/bootstrapInit') %>
     <script>
       const ROOMID = "<%= roomId %>";
-      const USERNAME = "CornSalad";
+      const USERNAME = "<%= username %>";
     </script>
     <script src="/socket.io/socket.io.js" defer></script>
-    <script src="/js/chatroom.js" defer></script>
+    <script type="module" src="/js/chatroom.js" defer></script>
     <link rel="stylesheet" href="/css/homepage/home.css" />
     <link rel="stylesheet" href="/css/meeting/chat.css" />
     <link rel="stylesheet" href="/css/chatroom/chatroom.css" />
   </head>
   <body>
     <nav class="navbar navbar-expand-lg">
-      <div class="container">
-        <a class="navbar-brand">Teams</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-toggle="collapse"
-          data-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav">
-            <!-- <li class="nav-item">
-              <a class="nav-link">New Meeting</a>
-            </li> -->
-          </ul>
-        </div>
+      <a class="navbar-brand">Teams</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <!-- <li class="nav-item">
+            <a class="nav-link">New Meeting</a>
+          </li> -->
+        </ul>
       </div>
     </nav>
 
@@ -45,6 +43,11 @@
       <div class="row">
         <div class="col-12 col-md-3">
           <div class="controlPanel d-flex flex-column align-items-center">
+            <p>
+              Room Invite: <br />
+              <span class="meetingId"><%= roomId %></span>
+              <i class="fas fa-clone"></i>
+            </p>
             <button id="joinRoom" class="d-block hvr-sweep-to-right">
               Join Video Call
             </button>
@@ -53,9 +56,12 @@
             </button>
           </div>
         </div>
-        <div class="col-12 col-md-9">
-          <div class="chatContainer">
-            <div id="chatContent"></div>
+        <div class="col-12 col-md-7">
+          <div id="chat">
+            <div
+              id="chatContent"
+              class="d-flex flex-column justify-content-start"
+            ></div>
             <div class="submit d-flex">
               <input
                 type="text"
