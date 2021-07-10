@@ -8,15 +8,25 @@
     <%- include('partials/bootstrapInit') %>
     <script>
       const ROOMID = "<%= roomId %>";
-      const USERNAME = "<%= username %>";
+      let USERNAME = "<%= username %>";
+      let MEMBER_COUNT = 0;
+      console.log("Hello");
+      if (!USERNAME) {
+        USERNAME = window.prompt(
+          "Please enter you username to proceed!",
+          "Enter username here"
+        );
+      }
     </script>
     <script src="/socket.io/socket.io.js" defer></script>
     <script type="module" src="/js/chatroom.js" defer></script>
     <link rel="stylesheet" href="/css/homepage/home.css" />
     <link rel="stylesheet" href="/css/meeting/chat.css" />
     <link rel="stylesheet" href="/css/chatroom/chatroom.css" />
+    <link rel="stylesheet" href="/css/meeting/notifications.css" />
   </head>
   <body>
+    <input type="text" name="" id="copyTextField" />
     <nav class="navbar navbar-expand-lg">
       <a class="navbar-brand">Teams</a>
       <button
@@ -38,7 +48,7 @@
         </ul>
       </div>
     </nav>
-
+    <div id="ohsnap"></div>
     <div class="container-fluid main">
       <div class="row">
         <div class="col-12 col-md-3">
@@ -46,7 +56,7 @@
             <p>
               Room Invite: <br />
               <span class="meetingId"><%= roomId %></span>
-              <i class="fas fa-clone"></i>
+              <i class="fas fa-clone" id="copyMeet"></i>
             </p>
             <button id="joinRoom" class="d-block hvr-sweep-to-right">
               Join Video Call
@@ -54,6 +64,12 @@
             <button id="leaveRoom" class="d-block hvr-sweep-to-right">
               Leave Chatroom
             </button>
+          </div>
+          <div class="controlPanel d-flex flex-column align-items-center">
+            <div class="membersHeading">
+              <p>Members (<span id="memberCount"></span>)</p>
+            </div>
+            <div id="userList"></div>
           </div>
         </div>
         <div class="col-12 col-md-7">
@@ -83,5 +99,11 @@
         </div>
       </div>
     </div>
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous"
+    ></script>
+    <script src="/js/ohsnap.min.js"></script>
   </body>
 </html>

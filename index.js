@@ -11,11 +11,15 @@ const io = require("socket.io")(server, {
   },
 });
 
+const MESSAGE_DATABASE = "message-database";
+const MONGO_PASSWORD = "toor";
+const MONGO_USER = "root";
+
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
 
 const mongoose = require("mongoose");
-const mongoDB = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.4marc.mongodb.net/message-database?retryWrites=true&w=majority`;
+const mongoDB = `mongodb+srv://${MONGO_USER}:${MONGO_PASSWORD}@cluster0.4marc.mongodb.net/${MESSAGE_DATABASE}?retryWrites=true&w=majority`;
 mongoose
   .connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
@@ -23,8 +27,9 @@ mongoose
   });
 
 const Message = require("./models/messages");
+const ChatroomUser = require("./models/chatroomUsers");
 let liveCaptionUser = undefined;
-let userList = [];
+let videoCallUserList = [];
 
 // when at root, give a new random roomID
 app.get("/", (req, res) => {
@@ -38,7 +43,6 @@ app.get("/:roomID", (req, res) => {
     roomId: req.params.roomID,
     username: req.query.username,
   });
-  console.log(req.query);
 });
 
 app.get("/meet/:roomID", (req, res) => {
@@ -46,6 +50,7 @@ app.get("/meet/:roomID", (req, res) => {
     roomId: req.params.roomID,
     username: req.query.username,
   });
+  console.log(req.query.username);
 });
 
 io.on("connection", (socket) => {
@@ -115,7 +120,6 @@ io.on("connection", (socket) => {
   socket.on("joinChatRoom", (roomID, username, userSocket) => {
     socket.join(roomID);
     socket.broadcast.to(roomID).emit("newChatroomConnection", userSocket);
-    userList[username] = userSocket;
     console.log("user with socket " + userSocket + " joined room " + roomID);
 
     Message.find({ roomID: `${roomID}` }, (err, messages) => {
@@ -125,6 +129,49 @@ io.on("connection", (socket) => {
         io.to(userSocket).emit("chatHistory", messages);
       }
     });
+
+    //Get user list, add new user if same user was not already in the room list
+    ChatroomUser.find({ roomID: roomID }, (err, users) => {
+      if (err) {
+        console.log("Error retriving users from room: ", err);
+      } else {
+        let exists = false;
+        users.forEach((user) => {
+          if (user.username === username) {
+            exists = true;
+          }
+        });
+        if (!exists) {
+          let newUser = new ChatroomUser({
+            roomID: roomID,
+            username: username,
+          });
+          newUser
+            .save()
+            .then(() => {
+              console.log("new user added to room");
+              sendEvent();
+            })
+            .catch((err) => {
+              console.log("error while saving new user to room", err);
+            });
+        } else {
+          sendEvent();
+        }
+      }
+    });
+
+    // emit the user list on new additions
+    const sendEvent = () => {
+      ChatroomUser.find({ roomID: roomID }, (err, users) => {
+        if (err) {
+          console.log("Error retriving users from room: ", err);
+        } else {
+          console.log("emitting list");
+          io.to(roomID).emit("userList", users);
+        }
+      });
+    };
   });
 });
 

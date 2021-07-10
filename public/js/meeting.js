@@ -176,7 +176,7 @@ socket.on("connect", () => {
 
 socket.on("chatHistory", (messages) => {
   messages.forEach((message) => {
-    addChatMessage(message, chatContent);
+    addChatMessage(message, chatContent, true);
   });
 });
 
