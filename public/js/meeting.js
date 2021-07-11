@@ -1,3 +1,4 @@
+// importing some exported modules
 import {
   toggleAudio,
   raiseHandHandler,
@@ -5,6 +6,7 @@ import {
   tippyHandler,
 } from "./modules/controlHandler.js";
 
+// create a peer for peer-to-peer connection
 const peer = new Peer(undefined, {
   host: "peerjsritvik.herokuapp.com",
   secure: true,
@@ -12,6 +14,7 @@ const peer = new Peer(undefined, {
   path: "/",
 });
 
+//import modules for speech recognition (stt -> speechToText)
 import {
   requestTranslation,
   stt,
@@ -42,23 +45,33 @@ const languageSubmit = document.querySelector("#languageSubmit");
 const translateButton = document.querySelector("#translateButton ");
 const liveCaptionHeading = document.querySelector("#liveCaptionHeading");
 
+//start self video (vido element) as muted
 const selfVideo = document.createElement("video");
-selfVideo.setAttribute("poster", "assets/userIcon.png");
+selfVideo.setAttribute("poster", "../assets/userIcon.png");
 selfVideo.muted = true;
 
+//make all live caption elements hidden by adding bootstrap class d-none
 results.classList.replace("d-block", "d-none");
 liveCaptionHeading.classList.replace("d-block", "d-none");
 translatedResults.classList.replace("d-block", "d-none");
 
+//---------- some variables for using during the code ----------------------
+// intended roomUsers structure: roomUsers[peer] = { call, peerVideo, handRaiseCount: 0 }
+// for getting peer's HTML Video in the DOM, the peerJS call object, and handRaiseCount for tracking video highlight
 let roomUsers = {};
+// videoDivMap structure: videoDivMap[HTMLVideoElement] = HTMLDivElementWithTheVideoElement
 let videoDivMap = {};
 let totalUsers = 1;
+// for hand detection toggle
 let enableDetection = false;
 let handNotif = new Audio("../assets/handRaise.mp3");
+// camVideo for keeping track of self-webcam feed
+// screenVideo for tracking screen-share video stream
 let camVideo = undefined;
 let screenVideo = undefined;
 let isCaptionEnabled = false;
 let isTranslateEnabled = false;
+// default translate language: korean
 let lang = "ko";
 
 // ---------------------- STARTING THE CALL ------------------------
@@ -68,9 +81,8 @@ navigator.mediaDevices
   .getUserMedia(videoConstraints)
   .then((mediaStream) => {
     addStreamToVideoObject(selfVideo, mediaStream, true);
-    // console.log(mediaStream.getAudioTracks[0]);
-    // set the properties of the controls
     camVideo = mediaStream.getVideoTracks()[0];
+    // set the properties of the controls
     initializeControls(mediaStream, selfVideo);
 
     // when there is incoming call
@@ -81,11 +93,13 @@ navigator.mediaDevices
       //answer the call
       call.answer(mediaStream);
       console.log("Answering the call");
+      // setup video element for the incoming peer stream, update roomUsers
       const peerVideo = document.createElement("video");
       roomUsers[call.peer] = { call, peerVideo, handRaiseCount: 0 };
       let i = 0;
       //when you get a reply from the peer who called
       call.on("stream", (peerStream) => {
+        // we recieve 2 streams, one audio and one video, hence we add the video div to the DOM when both have been recieved
         i += 1;
         console.log(`Got peer stream ${i}`);
         if (i % 2 == 0) addStreamToVideoObject(peerVideo, peerStream);
@@ -100,18 +114,20 @@ navigator.mediaDevices
       });
     });
 
-    //when you get a new connection
-    socket.on("newConnection", (incomingUserId) => {
-      console.log("User with PeerID " + incomingUserId + " joined the room");
-      callUserWithPeerID(incomingUserId, mediaStream);
+    //when you get a new connection, make a peerJS call to the incoming user
+    socket.on("newConnection", (incomingUserPeerId) => {
+      callUserWithPeerID(incomingUserPeerId, mediaStream);
     });
 
+    //when user clicks on screen share button
     screenshareButton.addEventListener("click", (e) => {
       console.log("Screenshare clicked");
+      // already selected, so click means disable screen share so stop tracks
       if (screenshareButton.classList.contains("selected")) {
         screenVideo.getVideoTracks().forEach((track) => {
           track.stop();
         });
+        // replace current-user screenshare video tracks in all calls with webcam video
         Object.keys(roomUsers).forEach((user) => {
           if (roomUsers[user].call) {
             roomUsers[user].call.peerConnection
@@ -120,17 +136,17 @@ navigator.mediaDevices
             console.log("Replacing video source");
           }
         });
-        mediaStream.removeTrack(mediaStream.getVideoTracks()[0]);
-        mediaStream.addTrack(camVideo);
         screenshareButton.classList.remove("selected");
         screenshareButton.classList.add("deselected");
-      } else {
+      }
+      // if button wasn't selected, then click means start screen share
+      else {
+        // get screen video
         navigator.mediaDevices
           .getDisplayMedia()
           .then((displayMediaStream) => {
             screenVideo = displayMediaStream;
-            mediaStream.removeTrack(camVideo);
-            mediaStream.addTrack(displayMediaStream.getVideoTracks()[0]);
+            // all outgoing calls, replace webcam video stream with display stream
             Object.keys(roomUsers).forEach((user) => {
               if (roomUsers[user].call) {
                 roomUsers[user].call.peerConnection
@@ -157,7 +173,7 @@ navigator.mediaDevices
     alert("Error getting user audio and video");
   });
 
-// upon current user peerID init
+// upon current user peer init, make a call on the socket to add current peer to the call
 peer.on("open", (id) => {
   console.log("peer open with id ", id);
   socket.emit("addUserToRoom", peer.id, ROOMID, socket.id);
@@ -174,40 +190,47 @@ socket.on("connect", () => {
   console.log("Socket connected with id: ", socket.id);
 });
 
+// when we get chatHistoy from the chatroom, add the messages to the chatbox
 socket.on("chatHistory", (messages) => {
   messages.forEach((message) => {
     addChatMessage(message, chatContent, true);
   });
 });
 
+// when we get speechToText result from another peer, add it to the caption box (result)
 socket.on("setLiveCaption", (caption) => {
   console.log("Got result from stt");
   results.innerHTML += caption.data;
   results.scrollTop = results.scrollHeight;
+  // if current user has enabled translate, get and display translated results
   if (isTranslateEnabled) {
     requestTranslation(lang, caption.data, translatedResults, socket);
   }
-  // translatedResults.innerHTML += translation.translation;
-  // translatedResults.scrollTop = translatedResults.scrollHeight;
 });
 
+// when we get raiseHand event, it means some peer raised hand
 socket.on("raiseHand", (peerID) => {
   console.log("someone raised hand ", roomUsers[peerID].peerVideo);
+  // highlight peer video who raised hand
   raiseHandHandler(roomUsers[peerID].peerVideo);
   roomUsers[peerID].handRaiseCount += 1;
   if (roomUsers[peerID].handRaiseCount % 2 != 0) handNotif.play();
 });
 
+// when we get this event, we highlight the video element of the user who enabled their captions
 socket.on("setLiveCaptionUser", (peerID) => {
   console.log("Setting peer " + peerID + " as live caption");
+  // ccon -> captions on
   roomUsers[peerID].peerVideo.classList.add("ccon");
   isCaptionEnabled = true;
   results.classList.replace("d-none", "d-block");
   liveCaptionHeading.classList.replace("d-none", "d-block");
+  // hide the current users caption button since someone is already speaking in conference, and enable translate button to toggle translations
   captionButton.classList.add("d-none");
   translateButton.classList.remove("d-none");
 });
 
+// unset a peer as coference caption emitter, show caption button since now the current user can broadcast their captions
 socket.on("unsetLiveCaptionUser", (peerID) => {
   roomUsers[peerID].peerVideo.classList.remove("ccon");
   isCaptionEnabled = false;
@@ -226,7 +249,7 @@ socket.on("unsetLiveCaptionUser", (peerID) => {
   }
 });
 
-// when a peer leaves the call
+// when a peer leaves the call, close their call
 socket.on("leavingCall", (userPeerID) => {
   console.log("recieved leavingCall of peer ", userPeerID);
   if (roomUsers[userPeerID].call) {
@@ -237,12 +260,13 @@ socket.on("leavingCall", (userPeerID) => {
   }
 });
 
-// when the socket gets a new chat
+// when the socket gets a new chat, add it to chat box
 socket.on("newChat", (data) => {
   addChatMessage(data, chatContent);
 });
 
-// ------------------------ HAND DETECTION LOGIC ----------------------------------
+// ------------------------ HAND DETECTION LOGIC ------------------------------
+// params for hand raise detection model
 const modelParams = {
   flipHorizontal: true, // flip e.g for video
   imageScaleFactor: 0.7, // reduce input image size .
@@ -256,17 +280,22 @@ let detectionStopped = false;
 let handRaised = false;
 let detectionCount = 0;
 
+//handler for hand detection
 const handDetectionHandler = () => {
   if (enableDetection)
+    //popup
     ohSnap("Enabling gestures...", {
       color: "yellow",
       duration: "1500",
     });
+  //start detection on self video HTML video element with webcam video stream
   handTrack.startVideo(selfVideo).then((status) => {
     if (status) {
       console.log("detection starting");
+      // interval for detect a hand every second to save resources
       let interval = setInterval(() => {
         if (detectionStopped || !enableDetection) {
+          // stop detection
           console.log("clearing interval of detection");
           clearInterval(interval);
           detectionCount = 0;
@@ -280,12 +309,14 @@ const handDetectionHandler = () => {
     model.detect(selfVideo).then((predictions) => {
       detectionCount += 1;
       if (enableDetection && detectionCount == 1)
+        //popup
         ohSnap("Gestures enabled!", {
           color: "green",
           duration: "1500",
         });
       console.log(predictions);
       predictions.forEach((prediction) => {
+        // if the detection results predict an open hand, raise hand
         if (prediction.label === "open" && !handRaised) {
           handRaised = true;
           selfRaiseHand();
@@ -300,10 +331,9 @@ const handDetectionHandler = () => {
 
 // -------------------------- BUTTON INITS ------------------------------
 const initializeControls = (mediaStream, selfVideo) => {
-  // roomLink.innerHTML = ROOMID;
-
   userNumber.innerHTML = totalUsers;
 
+  // tippy is a JS library for hover tool tips
   tippyHandler();
   muteButton.addEventListener("click", (e) => {
     toggleAudio(mediaStream, muteButton);
@@ -427,6 +457,7 @@ const callUserWithPeerID = (toCallPeerID, currentUserStream) => {
   const peerVideo = document.createElement("video");
   console.log("calling user with peerID: " + toCallPeerID, call);
   let i = 0;
+  //when peer answers with their mediaStream
   call.on("stream", (peerStream) => {
     i += 1;
     console.log(`Got peer stream ${i}`);
@@ -448,7 +479,7 @@ const callUserWithPeerID = (toCallPeerID, currentUserStream) => {
 
 const addStreamToVideoObject = (videoElement, mediaStream, isSelf = false) => {
   videoElement.classList.add("unraised");
-  videoElement.setAttribute("poster", "assets/userIcon.png");
+  videoElement.setAttribute("poster", "../assets/userIcon.png");
   videoElement.srcObject = mediaStream;
   console.log(mediaStream.getAudioTracks());
   console.log("Set source object for video");
@@ -458,7 +489,7 @@ const addStreamToVideoObject = (videoElement, mediaStream, isSelf = false) => {
   });
   const wrapper = document.createElement("div");
   const username = document.createElement("p");
-  username.innerHTML = USERNAME;
+  username.innerHTML = "";
   wrapper.classList.add("col", "video-wrapper");
   wrapper.appendChild(videoElement);
   wrapper.appendChild(username);

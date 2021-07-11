@@ -21,6 +21,7 @@
   border-left: 5px solid #9ea1ff;
   margin-bottom: 10px;
   width: max-content;
+  max-width: 100%;
 }
 
 .selfMessage {
