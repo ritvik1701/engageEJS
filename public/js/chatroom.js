@@ -12,18 +12,20 @@ const copyTextField = document.querySelector("#copyTextField");
 
 const socket = io.connect("/");
 
-let roomUsers = [];
 let userLength = 0;
 
+// join chatroom when socket init completes
 socket.on("connect", () => {
   console.log("Socket connected with id: ", socket.id);
   socket.emit("joinChatRoom", ROOMID, USERNAME, socket.id);
 });
 
+// when new user joins
 socket.on("newChatroomConnection", (userSocket) => {
   console.log("user with socket " + userSocket + " joined");
 });
 
+//when we get chatHistory for chatroom chat history, add all messages to chat box
 socket.on("chatHistory", (messages) => {
   console.log(messages);
   messages.forEach((message) => {
@@ -31,10 +33,12 @@ socket.on("chatHistory", (messages) => {
   });
 });
 
+// when we get new message, add to chat box
 socket.on("newChat", (data) => {
   addChatMessage(data, chatContent, true);
 });
 
+// when we get a user list, update the member box by removing old list and making new list with updated members
 socket.on("userList", (users) => {
   console.log("userlist recieved", users);
   userLength = users.length;
@@ -58,16 +62,19 @@ socket.on("userList", (users) => {
   userList.appendChild(list);
 });
 
+// when we click join video call, redirect to meet url
 joinRoom.addEventListener("click", (e) => {
   console.log("clicked");
   window.location.replace(`meet/${ROOMID}?username=${USERNAME}`);
 });
 
+// rediect to home page when we click leave chatroom
 leaveRoom.addEventListener("click", (e) => {
   console.log("clicked leave room");
   window.location.replace("/");
 });
 
+// when we send new message
 sendButton.addEventListener("click", (e) => {
   const message = chatInput.value;
   if (message !== "") {
@@ -84,6 +91,7 @@ sendButton.addEventListener("click", (e) => {
   }
 });
 
+// when we click on copy icon next to room link
 copyMeet.addEventListener("click", (e) => {
   const el = document.createElement("textarea");
   el.value = ROOMID;

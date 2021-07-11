@@ -1,3 +1,5 @@
+// method to add data as an HTML element to the DOM
+
 export const addChatMessage = (data, chatContent, isChatroom = false) => {
   const content = data.content;
   let user = data.username;
@@ -6,6 +8,7 @@ export const addChatMessage = (data, chatContent, isChatroom = false) => {
   const message = document.createElement("div");
   const wrapper = document.createElement("div");
 
+  // if we are in the chatroom, and the message is a system notif, don't display it
   if (isChatroom && system) {
     return;
   } else {

@@ -1,3 +1,5 @@
+// schema for chatroom users
+
 const mongoose = require("mongoose");
 const chatroomUserSchema = new mongoose.Schema({
   roomID: {

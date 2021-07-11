@@ -11,6 +11,7 @@ const io = require("socket.io")(server, {
   },
 });
 
+// ideally in the .env file, but made public for ease of replication
 const MESSAGE_DATABASE = "message-database";
 const MONGO_PASSWORD = "toor";
 const MONGO_USER = "root";
@@ -18,6 +19,7 @@ const MONGO_USER = "root";
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
 
+// set up DB access
 const mongoose = require("mongoose");
 const mongoDB = `mongodb+srv://${MONGO_USER}:${MONGO_PASSWORD}@cluster0.4marc.mongodb.net/${MESSAGE_DATABASE}?retryWrites=true&w=majority`;
 mongoose
@@ -26,10 +28,9 @@ mongoose
     console.log("Connected to db");
   });
 
+// get models
 const Message = require("./models/messages");
 const ChatroomUser = require("./models/chatroomUsers");
-let liveCaptionUser = undefined;
-let videoCallUserList = [];
 
 // when at root, give a new random roomID
 app.get("/", (req, res) => {
@@ -38,6 +39,7 @@ app.get("/", (req, res) => {
   res.render("home", { roomId: roomid });
 });
 
+// when request to a chatroom, render that chatroom with the username from the URL query
 app.get("/:roomID", (req, res) => {
   res.render("room", {
     roomId: req.params.roomID,
@@ -45,6 +47,7 @@ app.get("/:roomID", (req, res) => {
   });
 });
 
+// when requesting meeting, render meeting with username from the URL query
 app.get("/meet/:roomID", (req, res) => {
   res.render("meeting", {
     roomId: req.params.roomID,
@@ -53,9 +56,11 @@ app.get("/meet/:roomID", (req, res) => {
   console.log(req.query.username);
 });
 
+// on new socket connection
 io.on("connection", (socket) => {
   console.log("New socket connection: " + socket.id);
 
+  // when someone sends data to server, make a chat model, save to DB and emit to roomID (handled for both chatroom and video call)
   socket.on("data", (data) => {
     const chat = new Message({
       roomID: data.roomID,
@@ -76,9 +81,11 @@ io.on("connection", (socket) => {
       });
   });
 
+  // connection for the VIDEO CALL
   socket.on("addUserToRoom", (userPeerID, roomID, socketID) => {
     socket.join(roomID);
     socket.broadcast.to(roomID).emit("newConnection", userPeerID);
+    // get chatroom messages and send to socket
     Message.find({ roomID: `${roomID}` }, (err, messages) => {
       if (err) {
         console.log("Mongoose error while getting chats: ", err);
@@ -102,12 +109,10 @@ io.on("connection", (socket) => {
     });
 
     socket.on("liveCaptionUser", (peerID) => {
-      liveCaptionUser = peerID;
       socket.broadcast.to(roomID).emit("setLiveCaptionUser", peerID);
     });
 
     socket.on("liveCaptionUserOff", (peerID) => {
-      liveCaptionUser = undefined;
       socket.broadcast.to(roomID).emit("unsetLiveCaptionUser", peerID);
     });
 
@@ -117,11 +122,13 @@ io.on("connection", (socket) => {
     });
   });
 
+  // join for chat room
   socket.on("joinChatRoom", (roomID, username, userSocket) => {
     socket.join(roomID);
     socket.broadcast.to(roomID).emit("newChatroomConnection", userSocket);
     console.log("user with socket " + userSocket + " joined room " + roomID);
 
+    // get chat history and send to socket
     Message.find({ roomID: `${roomID}` }, (err, messages) => {
       if (err) {
         console.log("Mongoose error while getting chats: ", err);
