@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="/css/meeting/chat.css" />
     <link rel="stylesheet" href="/css/chatroom/chatroom.css" />
     <link rel="stylesheet" href="/css/meeting/notifications.css" />
+    <%-include('partials/introInit')%>
   </head>
   <body>
     <input type="text" name="" id="copyTextField" />
@@ -53,19 +54,31 @@
       <div class="row">
         <div class="col-12 col-md-3">
           <div class="controlPanel d-flex flex-column align-items-center">
-            <p>
+            <p
+              data-title="Invite people over!"
+              data-intro="Click on the copy icon to get the room invite code"
+            >
               Room Invite: <br />
               <span class="meetingId"><%= roomId %></span>
               <i class="fas fa-clone" id="copyMeet"></i>
             </p>
-            <button id="joinRoom" class="d-block hvr-sweep-to-right">
-              Join Video Call
-            </button>
-            <button id="leaveRoom" class="d-block hvr-sweep-to-right">
-              Leave Chatroom
-            </button>
+            <div
+              data-title="Control panel!"
+              data-intro="Click on the join button to enter the video call room, and leave chatroom to exit back to the homescreen."
+            >
+              <button id="joinRoom" class="d-block hvr-sweep-to-right">
+                Join Video Call
+              </button>
+              <button id="leaveRoom" class="d-block hvr-sweep-to-right">
+                Leave Chatroom
+              </button>
+            </div>
           </div>
-          <div class="controlPanel d-flex flex-column align-items-center">
+          <div
+            class="controlPanel d-flex flex-column align-items-center"
+            data-title="Member List!"
+            data-intro="Here is a list of all the users who have joined the chatroom. Don't see your friends? Invite them over!"
+          >
             <div class="membersHeading">
               <p>Members (<span id="memberCount"></span>)</p>
             </div>
@@ -73,7 +86,14 @@
           </div>
         </div>
         <div class="col-12 col-md-7">
-          <div id="chat">
+          <div
+            id="chat"
+            data-title="Talk away!"
+            data-intro="This is where all the conversation happens. 
+            Weren't in the room when a conversation took place? Don't worry! 
+            Chatrooms are synced with the video call chatbox, so you'll get 
+            all updates even if you missed out on the video call!"
+          >
             <div
               id="chatContent"
               class="d-flex flex-column justify-content-start"
@@ -98,6 +118,11 @@
           </div>
         </div>
       </div>
+    </div>
+    <div class="help">
+      <button class="hvr-sweep-to-right homeButton" onclick="startIntro()">
+        Help
+      </button>
     </div>
     <script
       src="https://code.jquery.com/jquery-3.6.0.min.js"

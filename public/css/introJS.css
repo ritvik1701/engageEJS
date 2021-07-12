@@ -1,0 +1,20 @@
+.introjs-tooltip {
+  color: black;
+}
+
+.help {
+  position: absolute;
+  bottom: 10px;
+  left: 15px;
+  width: fit-content;
+}
+
+.help button {
+  font-size: 15px;
+  padding: 3px 5px;
+}
+
+.introjs-helperLayer {
+  box-shadow: rgba(189, 189, 189, 0.8) 0px 0px 1px 2px,
+    rgba(255, 255, 255, 0.267) 0px 0px 0px 5000px !important;
+}

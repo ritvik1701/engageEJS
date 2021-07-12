@@ -23,15 +23,16 @@
     <script src="/socket.io/socket.io.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/handtrackjs/dist/handtrack.min.js"></script>
     <script type="module" src="/js/meeting.js" defer></script>
-    <%- include('partials/bootstrapInit') %>
+    <%-include('partials/bootstrapInit')%>
+    <link rel="stylesheet" href="/css/homepage/home.css" />
     <link rel="stylesheet" href="/css/meeting/room.css" />
     <link rel="stylesheet" href="/css/meeting/chat.css" />
     <link rel="stylesheet" href="/css/meeting/controls.css" />
     <link rel="stylesheet" href="/css/meeting/notifications.css" />
+    <%-include('partials/introInit')%>
   </head>
   <body>
     <input type="text" id="roomLink" />
-
     <div class="container-fluid">
       <div class="row">
         <div class="col-12 col-md-9">
@@ -44,7 +45,11 @@
         <%- include('partials/chatContainer') %>
       </div>
     </div>
-
+    <div class="help">
+      <button class="hvr-sweep-to-right homeButton" onclick="startIntro()">
+        Help
+      </button>
+    </div>
     <script
       src="https://code.jquery.com/jquery-3.6.0.min.js"
       integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="

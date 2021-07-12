@@ -2,33 +2,79 @@
 
 <div class="controls-container d-flex">
   <div class="controls">
-    <div class="users p-2">
+    <div
+      class="users p-2"
+      data-title="Control Panel!"
+      data-intro="This displays the number of users in the video call."
+    >
       <span id="userNumber" class="heading"></span>
       <i class="fas fa-user fa-lg"></i>
     </div>
   </div>
   <div class="controls">
-    <button class="deselected" id="muteButton">
+    <button
+      class="deselected"
+      id="muteButton"
+      data-title="Mute Button!"
+      data-intro="Toggle on/off your microphone input!"
+    >
       <i class="fas fa-microphone-slash fa-lg"></i>
     </button>
-    <button class="deselected" id="videoButton">
+    <button
+      class="deselected"
+      id="videoButton"
+      data-title="Video Button!"
+      data-intro="Toggle on/off your webcam input!"
+    >
       <i class="fas fa-video-slash fa-lg"></i>
     </button>
-    <button class="selected" id="disconnectButton">
+    <button
+      class="selected"
+      id="disconnectButton"
+      data-title="Disconnect!"
+      data-intro="Click this button when you want to return to the chatroom. Make sure to say goodbye to other members!"
+    >
       <i class="fas fa-phone-slash fa-lg"></i>
     </button>
   </div>
   <div class="controls">
-    <button class="deselected" id="screenshareButton">
+    <button
+      class="deselected"
+      id="screenshareButton"
+      data-title="Screenshare Button!"
+      data-intro="Want to share your screen? Now you know where to find the button for it!"
+    >
       <i class="fas fa-desktop fa-lg"></i>
     </button>
-    <button class="deselected" id="handButton">
+    <button
+      class="deselected"
+      id="handButton"
+      data-title="Raise Hand!"
+      data-intro="Click this button to raise your hand. 
+      Doing so will send a system notification in the chatbox, 
+      and an audio alert to other members!"
+    >
       <i class="fas fa-hand-paper fa-lg"></i>
     </button>
-    <button class="deselected" id="gestureButton">
+    <button
+      class="deselected"
+      id="gestureButton"
+      data-title="Gesture Button!"
+      data-intro="This is where the magic happens! Click this button to enable gesture
+      recognition, now you can raise your palm to the webcam and we will automatically
+      raise your hand in-meeting. How cool is that!"
+    >
       <i class="fas fa-hand-sparkles fa-lg"></i>
     </button>
-    <button class="deselected" id="captionButton">
+    <button
+      class="deselected"
+      id="captionButton"
+      data-title="Conference Mode!"
+      data-intro="Click this button to turn on YOUR live captions, which will be broadcasted
+      to all other members! If someone else has enabled their captions, this button will be 
+      replaced with a translate button, and you can translate their captions into any language 
+      you want, in real time!"
+    >
       <i class="fas fa-closed-captioning fa-lg"></i>
     </button>
     <button class="deselected d-none" id="translateButton">

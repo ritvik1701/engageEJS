@@ -73,7 +73,7 @@ body {
 
 ::placeholder {
   color: #ffffff65;
-  opacity: 1; /* Firefox */
+  opacity: 1;
 }
 
 :-ms-input-placeholder {

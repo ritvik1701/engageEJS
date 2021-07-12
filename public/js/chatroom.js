@@ -93,12 +93,12 @@ sendButton.addEventListener("click", (e) => {
 
 // when we click on copy icon next to room link
 copyMeet.addEventListener("click", (e) => {
-  const el = document.createElement("textarea");
-  el.value = ROOMID;
-  document.body.appendChild(el);
-  el.select();
+  const element = document.createElement("textarea");
+  element.value = `https://engagecloneritvik.herokuapp.com/${ROOMID}`;
+  document.body.appendChild(element);
+  element.select();
   document.execCommand("copy");
-  document.body.removeChild(el);
+  document.body.removeChild(element);
   ohSnap("Copied to clipboard!", {
     color: "green",
     duration: "1500",

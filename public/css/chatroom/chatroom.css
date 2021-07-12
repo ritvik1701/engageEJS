@@ -26,7 +26,7 @@ nav {
 .controlPanel button {
   width: 100%;
   padding: 10px;
-  margin: 8px;
+  margin: 8px 0px;
   background-color: #9ea1ff55;
   border: 3px solid #9ea2ff;
   border-radius: 5px;

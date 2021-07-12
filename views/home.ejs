@@ -9,7 +9,7 @@
       const ROOMID = "<%= roomId %>";
       const USERNAME = "Placeholder";
     </script>
-    <%- include('partials/bootstrapInit') %>
+    <%-include('partials/bootstrapInit')%> <%-include('partials/introInit')%>
     <script src="/socket.io/socket.io.js" defer></script>
     <script src="js/home.js" defer></script>
 
@@ -40,7 +40,10 @@
     <div class="content d-flex align-items-center justify-content-center">
       <div class="meetDetails">
         <h1 id="intro">Welcome!</h1>
-        <div>
+        <div
+          data-title="Welcome!"
+          data-intro="Welcome! Enter your username, this will be used as your identifier throughout the application!"
+        >
           <label class="mr-3" for="username">Username: </label>
           <input
             type="text"
@@ -49,15 +52,31 @@
             class="homeInput"
             placeholder="Enter Username"
           /><br />
-          <button id="newRoomBtn" class="hvr-sweep-to-right homeButton">
-            New Meeting
-          </button>
         </div>
-        <button id="joinRoomBtn" class="hvr-sweep-to-right homeButton">
-          Join Meeting
+        <button
+          id="newRoomBtn"
+          class="hvr-sweep-to-right homeButton"
+          data-title="Create a new meeting!"
+          data-intro="After entring your username, click this button to create a new meeting."
+        >
+          New Meeting
         </button>
-        <p class="joinInstructions">Click join to enter room invite</p>
+
+        <div
+          data-title="Join an existing meeting!"
+          data-intro="After entring your username, click this button to join an existing meeting with the invite code."
+        >
+          <button id="joinRoomBtn" class="hvr-sweep-to-right homeButton">
+            Join Meeting
+          </button>
+          <p class="joinInstructions">Click join to enter room invite</p>
+        </div>
       </div>
+    </div>
+    <div class="help">
+      <button class="hvr-sweep-to-right homeButton" onclick="startIntro()">
+        Help
+      </button>
     </div>
   </body>
 </html>
