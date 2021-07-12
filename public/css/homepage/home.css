@@ -66,6 +66,11 @@ body {
   text-align: center;
 }
 
+.joinInstructions {
+  text-align: center;
+  opacity: 0.5;
+}
+
 ::placeholder {
   color: #ffffff65;
   opacity: 1; /* Firefox */
