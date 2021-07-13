@@ -21,3 +21,5 @@ Divided workflow into 4 sprints of 1 week each:
 1. Sprint 1 - Learn
 2. Sprint 2, 3 - Design and Build
 4. Sprint 4 - Adapt and Finalize
+
+run "npm install" to get all dependencies
