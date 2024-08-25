@@ -2,7 +2,7 @@
 Ritvik Budhiraja - Indraprashta Institute of Information Technology, Delhi
 Live Demo: https://youtu.be/qTQDGbfwcs8
 
-> NOTE: Use Google Chrome for teh best experience, functionality might be limited/broken on other browsers
+> NOTE: Use Google Chrome for the best experience, functionality might be limited/broken on other browsers
 
 Implemented a video calling web application using Express and Node.js as backend, and EJS as a view engine for the frontend (using HTML, CSS, Bootstrap, Vanilla JavaScript and JS Libraries).
 
